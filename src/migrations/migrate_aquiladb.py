@@ -140,6 +140,36 @@ def create_temp_dbs (logging_session, user_session):
         print(e)
         return False
 
+
+def wipe_old_temp_dbs (logging_session, user_session):
+    query1 = "TRUNCATE content_index_by_database_t;"
+
+    query2 = "TRUNCATE content_metadata_by_database_t;"
+
+    query3 = "TRUNCATE search_history_by_database_t;"
+
+    query4 = "TRUNCATE search_correction_by_database_t;"
+
+    query5 = "TRUNCATE search_index_by_user_t;"
+
+    query6 = "TRUNCATE user_profile_by_email_t;"
+
+    query7 = "TRUNCATE public_subscribe_list_by_user_t;"
+            
+    try:
+        logging_session.execute(query1)
+        logging_session.execute(query2)
+        logging_session.execute(query3)
+        logging_session.execute(query4)
+        user_session.execute(query5)
+        user_session.execute(query6)
+        user_session.execute(query7)
+
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
 def copy_to_temp_dbs (logging_session, user_session):
     try:
         # direct copy contents
@@ -275,6 +305,8 @@ if __name__ == "__main__":
     user_session = create_session(["164.52.214.80"], 'users')
     time.sleep(1)
     print(create_temp_dbs(logging_session, user_session))
+    time.sleep(1)
+    print(wipe_old_temp_dbs(logging_session, user_session))
     time.sleep(1)
     print(copy_to_temp_dbs(logging_session, user_session))
     time.sleep(1)
