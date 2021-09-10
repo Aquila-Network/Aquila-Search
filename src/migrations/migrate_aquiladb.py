@@ -4,6 +4,8 @@
 from cassandra.cluster import Cluster
 
 import base58, uuid, time
+import requests
+import json
 
 from aquilapy import Wallet, DB
 
@@ -298,7 +300,26 @@ def copy_back_from_temp_dbs (logging_session, user_session):
         return False
 
 def populate_aquilaDB (logging_session):
-    pass
+    url = "https://localhost:5003/index"
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    try:
+        res = logging_session.execute("SELECT * FROM content_index_by_database_t ALLOW FILTERING;")
+        for r in res:
+            # r.database_name, r.url, r.html
+            payload = json.dumps({
+                "database": r.database_name,
+                "html": r.html,
+                "url": r.url
+            })
+            response = requests.request("POST", url, headers=headers, data=payload)
+            print(response)
+
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 if __name__ == "__main__":
     logging_session = create_session(["164.52.214.80"], 'logging')
@@ -310,8 +331,8 @@ if __name__ == "__main__":
     time.sleep(1)
     print(copy_to_temp_dbs(logging_session, user_session))
     time.sleep(1)
-    print(wipe_old_dbs(logging_session, user_session))
-    time.sleep(1)
-    print(copy_back_from_temp_dbs(logging_session, user_session))
-    time.sleep(1)
     print(populate_aquilaDB(logging_session))
+    # time.sleep(1)
+    # print(wipe_old_dbs(logging_session, user_session))
+    # time.sleep(1)
+    # print(copy_back_from_temp_dbs(logging_session, user_session))
