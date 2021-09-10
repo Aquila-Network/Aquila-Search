@@ -7,6 +7,33 @@ from ..index import create_database
 
 import base58, uuid, time
 
+from aquilapy import Wallet, DB
+
+# Create a wallet instance from private key
+wallet = Wallet("/ossl/private_unencrypted.pem")
+
+# Connect to Aquila DB instance
+db = DB("http://aquiladb", "5001", wallet)
+
+def create_database (user_id):
+
+    # Schema definition to be used
+    schema_def = {
+        "description": "Wikipedia",
+        "unique": user_id,
+        "encoder": "ftxt:https://ftxt-models.s3.us-east-2.amazonaws.com/cc.en.300.bin",
+        "codelen": 768,
+        "metadata": {
+            "url": "string",
+            "text": "string"
+        }
+    }
+
+    # Craete a database with the schema definition provided
+    db_name = db.create_database(schema_def)
+
+    return db_name, True
+
 # create a cassandra reader session
 def create_session (clusters_arr, kspace):
     cluster = Cluster(clusters_arr)
