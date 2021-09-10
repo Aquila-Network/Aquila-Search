@@ -153,40 +153,40 @@ def copy_to_temp_dbs (logging_session, user_session):
             VALUES('{}', '{}', {}, {});".format(r.usecret, r.pub_db_id, r.is_deleted, r.timestamp))
 
         # create new db names for each users
-        pub_db_adb_map = {}
+        adb_old_new_map = {}
         res = user_session.execute("SELECT * FROM search_index_by_user ALLOW FILTERING;")
         for r in res:
-            if not pub_db_adb_map.get(r.pub_db_id):
+            if not adb_old_new_map.get(r.aquila_database_name):
                 seed = base58.b58encode(uuid.uuid4().bytes)[:-14].decode("utf-8")+str(int(time.time()))
                 db_name, status = create_database(seed)
                 if not status:
                     return False
-                pub_db_adb_map[r.pub_db_id] = db_name
+                adb_old_new_map[r.aquila_database_name] = db_name
         
         res = user_session.execute("SELECT * FROM search_index_by_user ALLOW FILTERING;")
         for r in res:
             user_session.execute("INSERT INTO search_index_by_user_t (usecret, aquila_database_name, pub_db_id, pub_enabled, is_deleted, timestamp) \
-            VALUES('{}', '{}', '{}', {}, {}, {});".format(r.usecret, pub_db_adb_map[r.pub_db_id], r.pub_db_id, r.pub_enabled, r.is_deleted, r.timestamp))
+            VALUES('{}', '{}', '{}', {}, {}, {});".format(r.usecret, adb_old_new_map[r.aquila_database_name], r.pub_db_id, r.pub_enabled, r.is_deleted, r.timestamp))
         
         res = logging_session.execute("SELECT * FROM content_index_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO content_index_by_database_t (id_, database_name, url, html, timestamp, is_deleted) \
-            VALUES({}, '{}', '{}', '{}', {}, {});".format(r.id_, pub_db_adb_map[r.pub_db_id], r.url, r.html, r.timestamp, r.is_deleted))
+            VALUES({}, '{}', '{}', '{}', {}, {});".format(r.id_, adb_old_new_map[r.database_name], r.url, r.html, r.timestamp, r.is_deleted))
         
         res = logging_session.execute("SELECT * FROM content_metadata_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO content_metadata_by_database_t (id_, database_name, url, coverimg, title, author, timestamp, outlinks, summary) \
-            VALUES({}, '{}', '{}', '{}', '{}', '{}', {}, '{}', '{}');".format(r.id_, pub_db_adb_map[r.pub_db_id], r.url, r.coverimg, r.title, r.author, r.timestamp, r.outlinks, r.summary))
+            VALUES({}, '{}', '{}', '{}', '{}', '{}', {}, '{}', '{}');".format(r.id_, adb_old_new_map[r.database_name], r.url, r.coverimg, r.title, r.author, r.timestamp, r.outlinks, r.summary))
         
         res = logging_session.execute("SELECT * FROM search_history_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO search_history_by_database_t (id_, database_name, query, url, timestamp) \
-            VALUES({}, '{}', '{}', '{}', {});".format(r.id_, pub_db_adb_map[r.pub_db_id], r.query, r.url, r.timestamp))
+            VALUES({}, '{}', '{}', '{}', {});".format(r.id_, adb_old_new_map[r.database_name], r.query, r.url, r.timestamp))
         
         res = logging_session.execute("SELECT * FROM search_correction_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO search_correction_by_database_t (id_, database_name, query, url, timestamp) \
-            VALUES({}, '{}', '{}', '{}', {});".format(r.id_, pub_db_adb_map[r.pub_db_id], r.query, r.url, r.timestamp))
+            VALUES({}, '{}', '{}', '{}', {});".format(r.id_, adb_old_new_map[r.database_name], r.query, r.url, r.timestamp))
         
         return True
     except Exception as e:
