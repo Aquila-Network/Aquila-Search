@@ -152,36 +152,41 @@ def copy_to_temp_dbs (logging_session, user_session):
             user_session.execute("INSERT INTO public_subscribe_list_by_user_t (usecret, pub_db_id, is_deleted, timestamp) \
             VALUES('{}', '{}', {}, {});".format(r.usecret, r.pub_db_id, r.is_deleted, r.timestamp))
 
-        # create new db name
-        seed = base58.b58encode(uuid.uuid4().bytes)[:-14].decode("utf-8")+str(int(time.time()))
-        db_name, status = create_database(seed)
-        if not status:
-            return False
+        # create new db names for each users
+        pub_db_adb_map = {}
+        res = user_session.execute("SELECT * FROM search_index_by_user ALLOW FILTERING;")
+        for r in res:
+            if not pub_db_adb_map.get(r.pub_db_id):
+                seed = base58.b58encode(uuid.uuid4().bytes)[:-14].decode("utf-8")+str(int(time.time()))
+                db_name, status = create_database(seed)
+                if not status:
+                    return False
+                pub_db_adb_map[r.pub_db_id] = db_name
         
         res = user_session.execute("SELECT * FROM search_index_by_user ALLOW FILTERING;")
         for r in res:
             user_session.execute("INSERT INTO search_index_by_user_t (usecret, aquila_database_name, pub_db_id, pub_enabled, is_deleted, timestamp) \
-            VALUES('{}', '{}', '{}', {}, {}, {});".format(r.usecret, db_name, r.pub_db_id, r.pub_enabled, r.is_deleted, r.timestamp))
+            VALUES('{}', '{}', '{}', {}, {}, {});".format(r.usecret, pub_db_adb_map[r.pub_db_id], r.pub_db_id, r.pub_enabled, r.is_deleted, r.timestamp))
         
         res = logging_session.execute("SELECT * FROM content_index_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO content_index_by_database_t (id_, database_name, url, html, timestamp, is_deleted) \
-            VALUES({}, '{}', '{}', '{}', {}, {});".format(r.id_, db_name, r.url, r.html, r.timestamp, r.is_deleted))
+            VALUES({}, '{}', '{}', '{}', {}, {});".format(r.id_, pub_db_adb_map[r.pub_db_id], r.url, r.html, r.timestamp, r.is_deleted))
         
         res = logging_session.execute("SELECT * FROM content_metadata_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO content_metadata_by_database_t (id_, database_name, url, coverimg, title, author, timestamp, outlinks, summary) \
-            VALUES({}, '{}', '{}', '{}', '{}', '{}', {}, '{}', '{}');".format(r.id_, db_name, r.url, r.coverimg, r.title, r.author, r.timestamp, r.outlinks, r.summary))
+            VALUES({}, '{}', '{}', '{}', '{}', '{}', {}, '{}', '{}');".format(r.id_, pub_db_adb_map[r.pub_db_id], r.url, r.coverimg, r.title, r.author, r.timestamp, r.outlinks, r.summary))
         
         res = logging_session.execute("SELECT * FROM search_history_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO search_history_by_database_t (id_, database_name, query, url, timestamp) \
-            VALUES({}, '{}', '{}', '{}', {});".format(r.id_, db_name, r.query, r.url, r.timestamp))
+            VALUES({}, '{}', '{}', '{}', {});".format(r.id_, pub_db_adb_map[r.pub_db_id], r.query, r.url, r.timestamp))
         
         res = logging_session.execute("SELECT * FROM search_correction_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO search_correction_by_database_t (id_, database_name, query, url, timestamp) \
-            VALUES({}, '{}', '{}', '{}', {});".format(r.id_, db_name, r.query, r.url, r.timestamp))
+            VALUES({}, '{}', '{}', '{}', {});".format(r.id_, pub_db_adb_map[r.pub_db_id], r.query, r.url, r.timestamp))
         
         return True
     except Exception as e:
@@ -268,9 +273,9 @@ if __name__ == "__main__":
     logging_session = create_session(["164.52.214.80"], 'logging')
     user_session = create_session(["164.52.214.80"], 'users')
     time.sleep(1)
-    # print(create_temp_dbs(logging_session, user_session))
+    print(create_temp_dbs(logging_session, user_session))
     time.sleep(1)
-    # print(copy_to_temp_dbs(logging_session, user_session))
+    print(copy_to_temp_dbs(logging_session, user_session))
     time.sleep(1)
     print(wipe_old_dbs(logging_session, user_session))
     time.sleep(1)
