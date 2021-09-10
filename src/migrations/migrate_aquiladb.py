@@ -197,7 +197,7 @@ def rename_temp_dbs (logging_session, user_session):
 
 if __name__ == "__main__":
     logging_session = create_session(["164.52.214.80"], 'logging')
-    user_session = create_session(["164.52.214.80"], 'logging')
+    user_session = create_session(["164.52.214.80"], 'users')
     time.sleep(1)
     print(create_temp_dbs(logging_session, user_session))
     time.sleep(1)
