@@ -190,19 +190,19 @@ def copy_to_temp_dbs (logging_session, user_session):
 
 
 def wipe_old_dbs (logging_session, user_session):
-    query1 = "DELETE FROM content_index_by_database;"
+    query1 = "TRUNCATE content_index_by_database;"
 
-    query2 = "DELETE FROM content_metadata_by_database;"
+    query2 = "TRUNCATE content_metadata_by_database;"
 
-    query3 = "DELETE FROM search_history_by_database;"
+    query3 = "TRUNCATE search_history_by_database;"
 
-    query4 = "DELETE FROM search_correction_by_database;"
+    query4 = "TRUNCATE search_correction_by_database;"
 
-    query5 = "DELETE FROM search_index_by_user;"
+    query5 = "TRUNCATE search_index_by_user;"
 
-    query6 = "DELETE FROM user_profile_by_email;"
+    query6 = "TRUNCATE user_profile_by_email;"
 
-    query7 = "DELETE FROM public_subscribe_list_by_user;"
+    query7 = "TRUNCATE public_subscribe_list_by_user;"
             
     try:
         logging_session.execute(query1)
