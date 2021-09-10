@@ -300,13 +300,14 @@ def copy_back_from_temp_dbs (logging_session, user_session):
         return False
 
 def populate_aquilaDB (logging_session):
-    url = "https://localhost:5003/index"
+    url = "http://localhost:5003/index"
     headers = {
         'Content-Type': 'application/json'
     }
     try:
         res = logging_session.execute("SELECT * FROM content_index_by_database_t ALLOW FILTERING;")
         for r in res:
+            print("---")
             # r.database_name, r.url, r.html
             payload = json.dumps({
                 "database": r.database_name,
