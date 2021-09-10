@@ -3,8 +3,6 @@
 
 from cassandra.cluster import Cluster
 
-from ..index import create_database
-
 import base58, uuid, time
 
 from aquilapy import Wallet, DB
