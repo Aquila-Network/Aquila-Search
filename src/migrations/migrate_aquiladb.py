@@ -189,20 +189,91 @@ def copy_to_temp_dbs (logging_session, user_session):
         return False
 
 
-def drop_old_dbs (logging_session, user_session):
-    pass
+def wipe_old_dbs (logging_session, user_session):
+    query1 = "DELETE FROM content_index_by_database;"
 
-def rename_temp_dbs (logging_session, user_session):
+    query2 = "DELETE FROM content_metadata_by_database;"
+
+    query3 = "DELETE FROM search_history_by_database;"
+
+    query4 = "DELETE FROM search_correction_by_database;"
+
+    query5 = "DELETE FROM search_index_by_user;"
+
+    query6 = "DELETE FROM user_profile_by_email;"
+
+    query7 = "DELETE FROM public_subscribe_list_by_user;"
+            
+    try:
+        logging_session.execute(query1)
+        logging_session.execute(query2)
+        logging_session.execute(query3)
+        logging_session.execute(query4)
+        user_session.execute(query5)
+        user_session.execute(query6)
+        user_session.execute(query7)
+
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+def copy_back_from_temp_dbs (logging_session, user_session):
+    try:
+        # direct copy contents
+        res = user_session.execute("SELECT * FROM user_profile_by_email_t ALLOW FILTERING;")
+        for r in res:
+            user_session.execute("INSERT INTO user_profile_by_email (usecret, email, name, title, avatar_url, is_deleted, timestamp) \
+                VALUES('{}', '{}', '{}', '{}', '{}', {}, {});".format(r.usecret, r.email, r.name, r.title, r.avatar_url, r.is_deleted, r.timestamp))
+        
+        res = user_session.execute("SELECT * FROM public_subscribe_list_by_user_t ALLOW FILTERING;")
+        for r in res:
+            user_session.execute("INSERT INTO public_subscribe_list_by_user (usecret, pub_db_id, is_deleted, timestamp) \
+            VALUES('{}', '{}', {}, {});".format(r.usecret, r.pub_db_id, r.is_deleted, r.timestamp))
+        
+        res = user_session.execute("SELECT * FROM search_index_by_user_t ALLOW FILTERING;")
+        for r in res:
+            user_session.execute("INSERT INTO search_index_by_user (usecret, aquila_database_name, pub_db_id, pub_enabled, is_deleted, timestamp) \
+            VALUES('{}', '{}', '{}', {}, {}, {});".format(r.usecret, r.aquila_database_name, r.pub_db_id, r.pub_enabled, r.is_deleted, r.timestamp))
+        
+        res = logging_session.execute("SELECT * FROM content_index_by_database_t ALLOW FILTERING;")
+        for r in res:
+            logging_session.execute("INSERT INTO content_index_by_database (id_, database_name, url, html, timestamp, is_deleted) \
+            VALUES({}, '{}', '{}', '{}', {}, {});".format(r.id_, r.database_name, r.url, r.html, r.timestamp, r.is_deleted))
+        
+        res = logging_session.execute("SELECT * FROM content_metadata_by_database_t ALLOW FILTERING;")
+        for r in res:
+            logging_session.execute("INSERT INTO content_metadata_by_database (id_, database_name, url, coverimg, title, author, timestamp, outlinks, summary) \
+            VALUES({}, '{}', '{}', '{}', '{}', '{}', {}, '{}', '{}');".format(r.id_, r.database_name, r.url, r.coverimg, r.title, r.author, r.timestamp, r.outlinks, r.summary))
+        
+        res = logging_session.execute("SELECT * FROM search_history_by_database_t ALLOW FILTERING;")
+        for r in res:
+            logging_session.execute("INSERT INTO search_history_by_database (id_, database_name, query, url, timestamp) \
+            VALUES({}, '{}', '{}', '{}', {});".format(r.id_, r.database_name, r.query, r.url, r.timestamp))
+        
+        res = logging_session.execute("SELECT * FROM search_correction_by_database_t ALLOW FILTERING;")
+        for r in res:
+            logging_session.execute("INSERT INTO search_correction_by_database (id_, database_name, query, url, timestamp) \
+            VALUES({}, '{}', '{}', '{}', {});".format(r.id_, r.database_name, r.query, r.url, r.timestamp))
+        
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+def populate_aquilaDB (logging_session):
     pass
 
 if __name__ == "__main__":
     logging_session = create_session(["164.52.214.80"], 'logging')
     user_session = create_session(["164.52.214.80"], 'users')
     time.sleep(1)
-    print(create_temp_dbs(logging_session, user_session))
+    # print(create_temp_dbs(logging_session, user_session))
     time.sleep(1)
-    print(copy_to_temp_dbs(logging_session, user_session))
+    # print(copy_to_temp_dbs(logging_session, user_session))
     time.sleep(1)
-    print(drop_old_dbs(logging_session, user_session))
+    print(wipe_old_dbs(logging_session, user_session))
     time.sleep(1)
-    print(rename_temp_dbs(logging_session, user_session))
+    print(copy_back_from_temp_dbs(logging_session, user_session))
+    time.sleep(1)
+    print(populate_aquilaDB(logging_session))
