@@ -3,7 +3,7 @@
 
 from cassandra.cluster import Cluster
 
-import base58, uuid, time
+import base58, base64, uuid, time
 import requests
 import json
 
@@ -311,7 +311,7 @@ def populate_aquilaDB (logging_session):
             # r.database_name, r.url, r.html
             payload = json.dumps({
                 "database": r.database_name,
-                "html": r.html,
+                "html": base64.b64decode(r.html.encode("utf-8")).decode("utf-8"),
                 "url": r.url
             })
             response = requests.request("POST", url, headers=headers, data=payload)
