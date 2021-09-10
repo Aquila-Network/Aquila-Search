@@ -54,7 +54,7 @@ def create_session (clusters_arr, kspace):
 
     return session
 
-def create_temp_dbs (session):
+def create_temp_dbs (logging_session, user_session):
     query1 = "CREATE TABLE IF NOT EXISTS content_index_by_database_t ( \
             id_ varint, \
             database_name varchar, \
@@ -126,30 +126,30 @@ def create_temp_dbs (session):
             WITH CLUSTERING ORDER BY ( timestamp DESC, pub_db_id ASC );"
             
     try:
-        session.execute(query1)
-        session.execute(query2)
-        session.execute(query3)
-        session.execute(query4)
-        session.execute(query5)
-        session.execute(query6)
-        session.execute(query7)
+        logging_session.execute(query1)
+        logging_session.execute(query2)
+        logging_session.execute(query3)
+        logging_session.execute(query4)
+        user_session.execute(query5)
+        user_session.execute(query6)
+        user_session.execute(query7)
 
         return True
     except Exception as e:
         print(e)
         return False
 
-def copy_to_temp_dbs (session):
+def copy_to_temp_dbs (logging_session, user_session):
     try:
         # direct copy contents
-        res = session.execute("SELECT * FROM user_profile_by_email;")
+        res = user_session.execute("SELECT * FROM user_profile_by_email;")
         for r in res:
-            session.execute("INSERT INTO user_profile_by_email_t (usecret, email, name, title, avatar_url, is_deleted, timestamp) \
+            user_session.execute("INSERT INTO user_profile_by_email_t (usecret, email, name, title, avatar_url, is_deleted, timestamp) \
                 VALUES('{}', '{}', '{}', '{}', '{}', {}, {});".format(r.usecret, r.email, r.name, r.title, r.avatar_url, r.is_deleted, r.timestamp))
         
-        res = session.execute("SELECT * FROM public_subscribe_list_by_user;")
+        res = user_session.execute("SELECT * FROM public_subscribe_list_by_user;")
         for r in res:
-            session.execute("INSERT INTO public_subscribe_list_by_user_t (usecret, pub_db_id, is_deleted, timestamp) \
+            user_session.execute("INSERT INTO public_subscribe_list_by_user_t (usecret, pub_db_id, is_deleted, timestamp) \
             VALUES('{}', '{}', {}, {});".format(r.usecret, r.pub_db_id, r.is_deleted, r.timestamp))
 
         # create new db name
@@ -158,29 +158,29 @@ def copy_to_temp_dbs (session):
         if not status:
             return False
         
-        res = session.execute("SELECT * FROM search_index_by_user;")
+        res = user_session.execute("SELECT * FROM search_index_by_user;")
         for r in res:
-            session.execute("INSERT INTO search_index_by_user_t (usecret, aquila_database_name, pub_db_id, pub_enabled, is_deleted, timestamp) \
+            user_session.execute("INSERT INTO search_index_by_user_t (usecret, aquila_database_name, pub_db_id, pub_enabled, is_deleted, timestamp) \
             VALUES('{}', '{}', '{}', {}, {}, {});".format(r.usecret, db_name, r.pub_db_id, r.pub_enabled, r.is_deleted, r.timestamp))
         
-        res = session.execute("SELECT * FROM content_index_by_database;")
+        res = logging_session.execute("SELECT * FROM content_index_by_database;")
         for r in res:
-            session.execute("INSERT INTO content_index_by_database_t (id_, database_name, url, html, timestamp, is_deleted) \
+            logging_session.execute("INSERT INTO content_index_by_database_t (id_, database_name, url, html, timestamp, is_deleted) \
             VALUES({}, '{}', '{}', '{}', {}, {});".format(r.id_, db_name, r.url, r.html, r.timestamp, r.is_deleted))
         
-        res = session.execute("SELECT * FROM content_metadata_by_database;")
+        res = logging_session.execute("SELECT * FROM content_metadata_by_database;")
         for r in res:
-            session.execute("INSERT INTO content_metadata_by_database_t (id_, database_name, url, coverimg, title, author, timestamp, outlinks, summary) \
+            logging_session.execute("INSERT INTO content_metadata_by_database_t (id_, database_name, url, coverimg, title, author, timestamp, outlinks, summary) \
             VALUES({}, '{}', '{}', '{}', '{}', '{}', {}, '{}', '{}');".format(r.id_, db_name, r.url, r.coverimg, r.title, r.author, r.timestamp, r.outlinks, r.summary))
         
-        res = session.execute("SELECT * FROM search_history_by_database;")
+        res = logging_session.execute("SELECT * FROM search_history_by_database;")
         for r in res:
-            session.execute("INSERT INTO search_history_by_database_t (id_, database_name, query, url, timestamp) \
+            logging_session.execute("INSERT INTO search_history_by_database_t (id_, database_name, query, url, timestamp) \
             VALUES({}, '{}', '{}', '{}', {});".format(r.id_, db_name, r.query, r.url, r.timestamp))
         
-        res = session.execute("SELECT * FROM search_correction_by_database;")
+        res = logging_session.execute("SELECT * FROM search_correction_by_database;")
         for r in res:
-            session.execute("INSERT INTO search_correction_by_database_t (id_, database_name, query, url, timestamp) \
+            logging_session.execute("INSERT INTO search_correction_by_database_t (id_, database_name, query, url, timestamp) \
             VALUES({}, '{}', '{}', '{}', {});".format(r.id_, db_name, r.query, r.url, r.timestamp))
         
         return True
@@ -189,15 +189,20 @@ def copy_to_temp_dbs (session):
         return False
 
 
-def drop_old_dbs (session):
+def drop_old_dbs (logging_session, user_session):
     pass
 
-def rename_temp_dbs (session):
+def rename_temp_dbs (logging_session, user_session):
     pass
 
 if __name__ == "__main__":
-    session = create_session(["164.52.214.80"], 'logging')
-    print(create_temp_dbs(session))
-    print(copy_to_temp_dbs(session))
-    print(drop_old_dbs(session))
-    print(rename_temp_dbs(session))
+    logging_session = create_session(["164.52.214.80"], 'logging')
+    user_session = create_session(["164.52.214.80"], 'logging')
+    time.sleep(1)
+    print(create_temp_dbs(logging_session, user_session))
+    time.sleep(1)
+    print(copy_to_temp_dbs(logging_session, user_session))
+    time.sleep(1)
+    print(drop_old_dbs(logging_session, user_session))
+    time.sleep(1)
+    print(rename_temp_dbs(logging_session, user_session))
