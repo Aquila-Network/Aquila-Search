@@ -142,12 +142,12 @@ def create_temp_dbs (logging_session, user_session):
 def copy_to_temp_dbs (logging_session, user_session):
     try:
         # direct copy contents
-        res = user_session.execute("SELECT * FROM user_profile_by_email;")
+        res = user_session.execute("SELECT * FROM user_profile_by_email ALLOW FILTERING;")
         for r in res:
             user_session.execute("INSERT INTO user_profile_by_email_t (usecret, email, name, title, avatar_url, is_deleted, timestamp) \
                 VALUES('{}', '{}', '{}', '{}', '{}', {}, {});".format(r.usecret, r.email, r.name, r.title, r.avatar_url, r.is_deleted, r.timestamp))
         
-        res = user_session.execute("SELECT * FROM public_subscribe_list_by_user;")
+        res = user_session.execute("SELECT * FROM public_subscribe_list_by_user ALLOW FILTERING;")
         for r in res:
             user_session.execute("INSERT INTO public_subscribe_list_by_user_t (usecret, pub_db_id, is_deleted, timestamp) \
             VALUES('{}', '{}', {}, {});".format(r.usecret, r.pub_db_id, r.is_deleted, r.timestamp))
@@ -158,27 +158,27 @@ def copy_to_temp_dbs (logging_session, user_session):
         if not status:
             return False
         
-        res = user_session.execute("SELECT * FROM search_index_by_user;")
+        res = user_session.execute("SELECT * FROM search_index_by_user ALLOW FILTERING;")
         for r in res:
             user_session.execute("INSERT INTO search_index_by_user_t (usecret, aquila_database_name, pub_db_id, pub_enabled, is_deleted, timestamp) \
             VALUES('{}', '{}', '{}', {}, {}, {});".format(r.usecret, db_name, r.pub_db_id, r.pub_enabled, r.is_deleted, r.timestamp))
         
-        res = logging_session.execute("SELECT * FROM content_index_by_database;")
+        res = logging_session.execute("SELECT * FROM content_index_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO content_index_by_database_t (id_, database_name, url, html, timestamp, is_deleted) \
             VALUES({}, '{}', '{}', '{}', {}, {});".format(r.id_, db_name, r.url, r.html, r.timestamp, r.is_deleted))
         
-        res = logging_session.execute("SELECT * FROM content_metadata_by_database;")
+        res = logging_session.execute("SELECT * FROM content_metadata_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO content_metadata_by_database_t (id_, database_name, url, coverimg, title, author, timestamp, outlinks, summary) \
             VALUES({}, '{}', '{}', '{}', '{}', '{}', {}, '{}', '{}');".format(r.id_, db_name, r.url, r.coverimg, r.title, r.author, r.timestamp, r.outlinks, r.summary))
         
-        res = logging_session.execute("SELECT * FROM search_history_by_database;")
+        res = logging_session.execute("SELECT * FROM search_history_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO search_history_by_database_t (id_, database_name, query, url, timestamp) \
             VALUES({}, '{}', '{}', '{}', {});".format(r.id_, db_name, r.query, r.url, r.timestamp))
         
-        res = logging_session.execute("SELECT * FROM search_correction_by_database;")
+        res = logging_session.execute("SELECT * FROM search_correction_by_database ALLOW FILTERING;")
         for r in res:
             logging_session.execute("INSERT INTO search_correction_by_database_t (id_, database_name, query, url, timestamp) \
             VALUES({}, '{}', '{}', '{}', {});".format(r.id_, db_name, r.query, r.url, r.timestamp))
