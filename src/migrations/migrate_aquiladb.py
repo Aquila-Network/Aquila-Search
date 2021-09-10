@@ -38,6 +38,7 @@ def create_session (clusters_arr, kspace):
     # try connecting
     try:
         session = cluster.connect()
+        session.default_timeout = 120
     except Exception as e:
         print(e)
         return None
