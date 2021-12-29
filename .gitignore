@@ -1,0 +1,7 @@
+.env
+.idea
+vendor
+tmp
+.database
+.DS_Store
+main

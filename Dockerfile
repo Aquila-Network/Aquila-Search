@@ -1,40 +1,25 @@
-# start a new build stage
-FROM ubuntu:latest as builder
+FROM golang:1.17-alpine
 
-# set work directory
-ENV ROOT_DIR /home/root
-WORKDIR $ROOT_DIR
+RUN go version
+ENV GOPATH=/
+WORKDIR /aquila_db
 
-# preperations
-ENV PATH="$ROOT_DIR/env/bin:$PATH"
+COPY ./ ./
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# install psql
+RUN apk update
+RUN apk add postgresql-client
 
-RUN apt update && apt install -y git nano python3.8 python3-pip libssl-dev && \
-    pip3 install virtualenv
+# make wait-for-postgres.sh executable
+RUN chmod +x wait-for-postgres.sh
 
-RUN cd $ROOT_DIR && \
-    mkdir -p ax
-    
-ADD ./  $ROOT_DIR/ax/
+# install dependencies
+RUN go mod download
+# Install Compile Daemon for go. We'll use it to watch changes in go files
+RUN go get github.com/githubnemo/CompileDaemon
 
-WORKDIR $ROOT_DIR/ax/
+# RUN go build -o aquila_db ./cmd/main.go
+# CMD ["./main"] # --- to run vithout reloading
 
-RUN virtualenv $ROOT_DIR/env && \
-    source $ROOT_DIR/env/bin/activate && \
-    cd src && pip3 install -r requirements.txt
-
-RUN mkdir -p /ossl/ && \
-    openssl genrsa -passout pass:1234 -des3 -out /ossl/private.pem 2048 && \
-    openssl rsa -passin pass:1234 -in /ossl/private.pem -outform PEM -pubout -out /ossl/public.pem && \
-    openssl rsa -passin pass:1234 -in /ossl/private.pem -out /ossl/private_unencrypted.pem -outform PEM
-
-# install and start demon
-RUN mkdir -p /data && \
-    printf "#!/bin/bash\nsource /home/root/env/bin/activate && cd /home/root/ax/src && \
-    python3 index.py" > /bin/init.sh && chmod +x /bin/init.sh
-
-# expose port
-EXPOSE 5000
-
-ENTRYPOINT ["init.sh"]
+ENTRYPOINT CompileDaemon --build="go build cmd/main.go" --command=./main
+# ENTRYPOINT CompileDaemon --build="go build -o main cmd/main.go" --command=./main

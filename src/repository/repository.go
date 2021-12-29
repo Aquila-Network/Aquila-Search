@@ -1,0 +1,29 @@
+package repository
+
+import (
+	"aquiladb/src/model"
+
+	"github.com/jmoiron/sqlx"
+)
+
+type AuthRepositoryInterface interface {
+	Register(model.User) (model.User, error)
+	Login(email, password string) (model.User, error)
+}
+
+type UserRepositoryInterface interface {
+	GetAllUsers()
+	GetUserById()
+}
+
+type Repository struct {
+	AuthRepositoryInterface
+	UserRepositoryInterface
+}
+
+func NewRepository(db *sqlx.DB) *Repository {
+	return &Repository{
+		AuthRepositoryInterface: NewAuthPostgres(db),
+		UserRepositoryInterface: NewUserPostgres(db),
+	}
+}
