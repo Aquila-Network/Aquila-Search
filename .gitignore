@@ -5,3 +5,4 @@ tmp
 .database
 .DS_Store
 main
+logs
