@@ -14,10 +14,11 @@ import (
 )
 
 var (
-	envConfig  = config.InitEnvConfig()
-	salt       = envConfig.Hash.Salt
-	signingKey = envConfig.Hash.SignKey
-	tokenTTL   = 24 * time.Hour
+	envConfig                = config.InitEnvConfig()
+	salt                     = envConfig.Hash.Salt
+	signingKey               = envConfig.Hash.SignKey
+	tokenTTL                 = 24 * time.Hour
+	tokenTTlForTemporaryUser = 168 * time.Hour
 )
 
 type TokenClaims struct {

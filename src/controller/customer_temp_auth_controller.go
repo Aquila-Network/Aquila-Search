@@ -20,6 +20,6 @@ func NewCustomerTempAuthController(service service.CustomerTempAuthInterface) *C
 func (c CustomerTempAuthController) CreateTempCustomer(ctx *gin.Context) {
 	a, _ := c.service.CreateTempCustomer()
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": a,
+		"token": a,
 	})
 }

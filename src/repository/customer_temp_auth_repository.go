@@ -17,22 +17,21 @@ func NewCustomerTempAuthRepository(db *sqlx.DB) *CustomerTempAuthPostgres {
 	}
 }
 
-func (c CustomerTempAuthPostgres) RegisterTempCustomer(customer model.CustomerTemp) (string, error) {
-
-	var id int
+func (c CustomerTempAuthPostgres) RegisterTempCustomer(customer model.CustomerTemp) (*model.CustomerTemp, error) {
 
 	row := c.db.QueryRow(
-		"INSERT INTO customers_temp (first_name, last_name, secret_key) values ($1, $2, $3) RETURNING id",
+		"INSERT INTO customers_temp (first_name, last_name, secret_key) values ($1, $2, $3) RETURNING id, customer_id",
 		customer.FirstName,
 		customer.LastName,
 		customer.SecretKey,
 	)
-	if err := row.Scan(&id); err != nil {
+	if err := row.Scan(&customer.Id, &customer.CustomerId); err != nil {
 		fmt.Println("Error create customer.")
-		return err.Error(), err
+		return nil, err
 	}
 
-	successMessage := fmt.Sprintf("Customer created wiht id = %d", id)
+	successMessage := fmt.Sprintf("Customer created wiht id = %d, customer = %v", customer.Id, customer.CustomerId)
+	fmt.Println(successMessage)
 
-	return successMessage, nil
+	return &customer, nil
 }

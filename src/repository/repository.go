@@ -17,7 +17,7 @@ type UserRepositoryInterface interface {
 }
 
 type CustomerTempAuthRepositoryInterface interface {
-	RegisterTempCustomer(model.CustomerTemp) (string, error)
+	RegisterTempCustomer(model.CustomerTemp) (*model.CustomerTemp, error)
 }
 
 type Repository struct {
