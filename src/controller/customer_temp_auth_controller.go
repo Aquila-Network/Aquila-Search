@@ -18,8 +18,13 @@ func NewCustomerTempAuthController(service service.CustomerTempAuthInterface) *C
 }
 
 func (c CustomerTempAuthController) CreateTempCustomer(ctx *gin.Context) {
-	a, _ := c.service.CreateTempCustomer()
+	customer, err := c.service.CreateTempCustomer()
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"token": a,
+		"secret_key": customer.SecretKey,
+		"token":      customer.Token,
 	})
 }

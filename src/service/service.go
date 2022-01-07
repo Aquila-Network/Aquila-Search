@@ -11,7 +11,7 @@ type AuthServiceInterface interface {
 }
 
 type CustomerTempAuthInterface interface {
-	CreateTempCustomer() (string, error)
+	CreateTempCustomer() (model.CustomerTemp, error)
 }
 
 type Service struct {

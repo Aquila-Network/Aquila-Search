@@ -49,7 +49,7 @@ func NewCustomerTempAuthService(repo repository.CustomerTempAuthRepositoryInterf
 	}
 }
 
-func (c CustomerTempAuth) CreateTempCustomer() (string, error) {
+func (c CustomerTempAuth) CreateTempCustomer() (model.CustomerTemp, error) {
 
 	var customer model.CustomerTemp
 
@@ -62,15 +62,18 @@ func (c CustomerTempAuth) CreateTempCustomer() (string, error) {
 
 	createdCustomer, err := c.repo.RegisterTempCustomer(customer)
 	if err != nil {
-		return err.Error(), err
+		return customer, err
 	}
 
 	token, err := GenerateTokenForTempCustomer(*createdCustomer)
 	if err != nil {
-		return err.Error(), err
+		return customer, err
 	}
 
-	return token, err
+	// ???
+	createdCustomer.Token = token
+
+	return *createdCustomer, err
 }
 
 func KeyGenerate(length int) string {
