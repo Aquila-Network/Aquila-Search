@@ -1,6 +1,9 @@
 package service
 
-import "aquiladb/src/repository"
+import (
+	"aquiladb/src/model"
+	"aquiladb/src/repository"
+)
 
 type CustomerTempAuth struct {
 	repo repository.CustomerTempAuthRepositoryInterface
@@ -13,5 +16,5 @@ func NewCustomerTempAuthService(repo repository.CustomerTempAuthRepositoryInterf
 }
 
 func (c CustomerTempAuth) CreateTempCustomer() (string, error) {
-	return c.repo.RegisterTempCustomer()
+	return c.repo.RegisterTempCustomer(model.CustomerTemp{})
 }

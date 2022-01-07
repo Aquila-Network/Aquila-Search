@@ -1,6 +1,10 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"aquiladb/src/model"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type CustomerTempAuthPostgres struct {
 	db *sqlx.DB
@@ -12,6 +16,6 @@ func NewCustomerTempAuthRepository(db *sqlx.DB) *CustomerTempAuthPostgres {
 	}
 }
 
-func (c CustomerTempAuthPostgres) RegisterTempCustomer() (string, error) {
+func (c CustomerTempAuthPostgres) RegisterTempCustomer(custoemr model.CustomerTemp) (string, error) {
 	return "Hello from repository.", nil
 }
