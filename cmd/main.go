@@ -68,6 +68,7 @@ func main() {
 	customer := server.Group("/customer")
 	{
 		customer.POST("", controllers.CreateTempCustomer)
+		customer.PATCH("", controllers.CreatePermanentCustomer)
 	}
 
 	server.Run(":" + envConfig.App.Port)

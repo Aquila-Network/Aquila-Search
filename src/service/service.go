@@ -10,18 +10,24 @@ type AuthServiceInterface interface {
 	Login(model.LoginUser) (string, error)
 }
 
-type CustomerTempAuthInterface interface {
+type CustomerTempAuthServiceInterface interface {
 	CreateTempCustomer() (model.CustomerTemp, error)
+}
+
+type CustomerAuthServiceInterface interface {
+	CreatePermanentCustomer() (string, error)
 }
 
 type Service struct {
 	AuthServiceInterface
-	CustomerTempAuthInterface
+	CustomerTempAuthServiceInterface
+	CustomerAuthServiceInterface
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		AuthServiceInterface:      NewAuthService(repos.AuthRepositoryInterface),
-		CustomerTempAuthInterface: NewCustomerTempAuthService(repos.CustomerTempAuthRepositoryInterface),
+		AuthServiceInterface:             NewAuthService(repos.AuthRepositoryInterface),
+		CustomerTempAuthServiceInterface: NewCustomerTempAuthService(repos.CustomerTempAuthRepositoryInterface),
+		CustomerAuthServiceInterface:     NewCustomerAuthService(repos.CustomerAuthRepositoryInterface),
 	}
 }

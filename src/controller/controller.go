@@ -15,14 +15,20 @@ type CustomerTempAuthInterface interface {
 	CreateTempCustomer(c *gin.Context)
 }
 
+type CustomerAuthInterface interface {
+	CreatePermanentCustomer(c *gin.Context)
+}
+
 type Controller struct {
 	AuthControllerInterface
 	CustomerTempAuthInterface
+	CustomerAuthInterface
 }
 
 func NewController(services *service.Service) *Controller {
 	return &Controller{
 		AuthControllerInterface:   NewAuthController(services.AuthServiceInterface),
-		CustomerTempAuthInterface: NewCustomerTempAuthController(services.CustomerTempAuthInterface),
+		CustomerTempAuthInterface: NewCustomerTempAuthController(services.CustomerTempAuthServiceInterface),
+		CustomerAuthInterface:     NewCustomerAuthController(services.CustomerAuthServiceInterface),
 	}
 }

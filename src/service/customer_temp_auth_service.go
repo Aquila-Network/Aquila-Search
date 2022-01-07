@@ -34,9 +34,8 @@ var (
 
 type TokenClaimsForTempCustomer struct {
 	jwt.StandardClaims
-	Id           int
-	CustomerUuid string
-	IsPermanent  bool
+	CustomerUuid string `json:"customer_uuid"`
+	IsPermanent  bool   `json:"is_permanent"`
 }
 
 type CustomerTempAuth struct {
@@ -96,7 +95,6 @@ func GenerateTokenForTempCustomer(customer model.CustomerTemp) (string, error) {
 			ExpiresAt: time.Now().Add(tokenTTlForTemporaryUser).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
-		int(customer.Id),
 		customer.CustomerId,
 		customer.IsPermanent,
 	})

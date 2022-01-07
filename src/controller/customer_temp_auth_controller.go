@@ -8,10 +8,10 @@ import (
 )
 
 type CustomerTempAuthController struct {
-	service service.CustomerTempAuthInterface
+	service service.CustomerTempAuthServiceInterface
 }
 
-func NewCustomerTempAuthController(service service.CustomerTempAuthInterface) *CustomerTempAuthController {
+func NewCustomerTempAuthController(service service.CustomerTempAuthServiceInterface) *CustomerTempAuthController {
 	return &CustomerTempAuthController{
 		service: service,
 	}

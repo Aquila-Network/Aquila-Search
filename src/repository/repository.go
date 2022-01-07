@@ -20,10 +20,15 @@ type CustomerTempAuthRepositoryInterface interface {
 	RegisterTempCustomer(model.CustomerTemp) (*model.CustomerTemp, error)
 }
 
+type CustomerAuthRepositoryInterface interface {
+	CreatePermanentCustomer() (string, error)
+}
+
 type Repository struct {
 	AuthRepositoryInterface
 	UserRepositoryInterface
 	CustomerTempAuthRepositoryInterface
+	CustomerAuthRepositoryInterface
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -31,5 +36,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 		AuthRepositoryInterface:             NewAuthPostgres(db),
 		UserRepositoryInterface:             NewUserPostgres(db),
 		CustomerTempAuthRepositoryInterface: NewCustomerTempAuthRepository(db),
+		CustomerAuthRepositoryInterface:     NewCustomerAuthRepository(db),
 	}
 }

@@ -23,14 +23,6 @@ Run migrations from migrations/migration.sql file:
 $ MIGRATIONS=`cat migrations/migration.sql` && DATABASE_NAME=$(grep DB_NAME .env | cut -d '=' -f 2-) && docker exec -it postgres_db psql "postgresql://$DB_USER:$DB_PASS/${DATABASE_NAME}" --command="$MIGRATIONS"
 ```
 
-Run user seeder from migrations/seeder.sql file:
-```bash
-$ SEEDER=`cat migrations/seeder.sql` && DATABASE_NAME=$(grep DB_NAME .env | cut -d '=' -f 2-) && docker exec -it postgres_db psql "postgresql://$DB_USER:$DB_PASS/${DATABASE_NAME}" --command="$SEEDER"
-```
-Every user credentials you can find in migrations/seeder.sql file. Every users have password = 123
-Admin - admin@admin.com 
-
-
 3. To stop - press Ctrl+c and then:
 ```bash
 $ docker-compose down

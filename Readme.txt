@@ -66,6 +66,9 @@ Postman.
 1. Create temp customer:
     post /customer
 
+2. Create permanent customer:
+    patch /customer
+
 
 
 // ======================================
@@ -80,3 +83,7 @@ Example for random name:
 https://github.com/moby/moby/blob/master/pkg/namesgenerator/names-generator.go
 
 
+Run user seeder from migrations/seeder.sql file:
+```bash
+$ SEEDER=`cat migrations/seeder.sql` && DATABASE_NAME=$(grep DB_NAME .env | cut -d '=' -f 2-) && docker exec -it postgres_db psql "postgresql://$DB_USER:$DB_PASS/${DATABASE_NAME}" --command="$SEEDER"
+```
