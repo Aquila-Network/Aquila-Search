@@ -65,6 +65,11 @@ func main() {
 		})
 	}
 
+	customer := server.Group("/customer")
+	{
+		customer.POST("", controllers.CreateTempCustomer)
+	}
+
 	server.Run(":" + envConfig.App.Port)
 
 }

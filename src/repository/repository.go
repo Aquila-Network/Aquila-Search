@@ -16,14 +16,20 @@ type UserRepositoryInterface interface {
 	GetUserById()
 }
 
+type CustomerTempAuthRepositoryInterface interface {
+	RegisterTempCustomer() (string, error)
+}
+
 type Repository struct {
 	AuthRepositoryInterface
 	UserRepositoryInterface
+	CustomerTempAuthRepositoryInterface
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		AuthRepositoryInterface: NewAuthPostgres(db),
-		UserRepositoryInterface: NewUserPostgres(db),
+		AuthRepositoryInterface:             NewAuthPostgres(db),
+		UserRepositoryInterface:             NewUserPostgres(db),
+		CustomerTempAuthRepositoryInterface: NewCustomerTempAuthRepository(db),
 	}
 }

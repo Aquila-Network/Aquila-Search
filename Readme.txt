@@ -59,7 +59,12 @@ Postman.
 
 4. Admin route:
     get /admin 
-    only for admin
+    only for 
+    
+// ======================================
+
+1. Create temp customer:
+    post /customer
 
 
 
