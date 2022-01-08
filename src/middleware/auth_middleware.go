@@ -46,15 +46,16 @@ func UserIdentity(c *gin.Context) {
 	}
 
 	if !tokenClaims.IsActive {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-			"error": "Your account had been blocked. Please contact to admin.",
-		})
+		// c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+		// 	"error": "Your account had been blocked. Please contact to admin.",
+		// })
 	}
 
-	c.Set(userCtx, tokenClaims)
+	// c.Set(userCtx, tokenClaims)
 	c.Next()
 }
 
+// ???
 func AdminIdentity(c *gin.Context) {
 	header := c.GetHeader(authorizationHeader)
 	headerParts := strings.Split(header, " ")

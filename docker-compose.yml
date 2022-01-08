@@ -14,21 +14,10 @@ services:
       - db
     volumes:
       - ./:/aquila_db
-    # environment:
-    #   - DB_PASSWORD=password
-    #   - APP_NAME=db
-    #   - APP_PORT=8000
-    #   - DB_HOST=db123
-    #   - DB_PORT=5432
-    #   - DB_USER=root
-    #   - DB_PASS=password
-    #   - DB_NAME=go_aquila
-    #   - DB_SSLMODE=disable
-    #   - HASH_SALT=secret
-    #   - HASH_SIGN_KEY=secret
     networks:
       - go_postgresql
 
+  # PostgreSQL
   db:
     image: postgres:14
     container_name: postgres_db
@@ -53,31 +42,3 @@ services:
       - ${DOCKER_ADMINER_PORT}:8080
     networks:
       - go_postgresql
-
-
-
-#   # postgresql
-#   db:
-#     image: postgres:14
-#     ports:
-#       - 5432:5432
-#     volumes:
-#       - ./.database:/var/lib/postgresql/data
-#     # restart: unless-stopped  
-#     environment:
-#       POSTGRES_USER: root
-#       POSTGRES_PASSWORD: password
-#     networks:
-#       - postgresql_14_adminer
-
-#   # adminer        
-#   adminer:
-#     image: adminer:4.8.1
-#     # restart: unless-stopped 
-#     ports:
-#       - 8085:8080
-#     networks:
-#       - postgresql_14_adminer
-
-# volumes:
-#   .database:

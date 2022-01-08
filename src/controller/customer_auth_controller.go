@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"aquiladb/src/model"
 	"aquiladb/src/service"
 	"net/http"
 
@@ -18,9 +19,20 @@ func NewCustomerAuthController(service service.CustomerAuthServiceInterface) *Cu
 }
 
 func (c *CustomerAuthController) CreatePermanentCustomer(ctx *gin.Context) {
-	a, _ := c.service.CreatePermanentCustomer()
+	var customer model.Customer
+
+	if err := ctx.ShouldBindJSON(&customer); err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	response, err := c.service.CreatePermanentCustomer(customer)
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"secret_key": a,
+		"customer": response,
 	})
 }

@@ -21,7 +21,8 @@ type CustomerTempAuthRepositoryInterface interface {
 }
 
 type CustomerAuthRepositoryInterface interface {
-	CreatePermanentCustomer() (string, error)
+	CreatePermanentCustomer(model.Customer) (string, error)
+	FindCustomerBySecretKey(secretKey string) (model.CustomerTemp, error)
 }
 
 type Repository struct {

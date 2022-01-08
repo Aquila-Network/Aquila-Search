@@ -60,7 +60,7 @@ func (a *authService) Register(user model.User) (string, error) {
 		return "", errors.New("Email is required 'email'.")
 	}
 
-	if isEmailValid(user.Email) == false {
+	if IsEmailValid(user.Email) == false {
 		return "", errors.New("Email is not valid.")
 	}
 
@@ -88,7 +88,7 @@ func (a *authService) Login(user model.LoginUser) (string, error) {
 		return "", errors.New("Email is required 'email'.")
 	}
 
-	if isEmailValid(user.Email) == false {
+	if IsEmailValid(user.Email) == false {
 		return "", errors.New("Email is not valid.")
 	}
 
@@ -138,7 +138,7 @@ func ParseToken(accessToken string) (TokenClaims, error) {
 
 	token, err := jwt.ParseWithClaims(accessToken, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
+			return nil, errors.New("Invalid token.")
 		}
 
 		return []byte(signingKey), nil
@@ -156,7 +156,7 @@ func ParseToken(accessToken string) (TokenClaims, error) {
 }
 
 // remove this after find out how to correctly validate
-func isEmailValid(e string) bool {
+func IsEmailValid(e string) bool {
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	return emailRegex.MatchString(e)
 }

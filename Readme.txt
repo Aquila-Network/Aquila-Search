@@ -67,7 +67,14 @@ Postman.
     post /customer
 
 2. Create permanent customer:
+    auth token - required
     patch /customer
+    {
+        "first_name": "Bob",
+        "last_name": "Stone",
+        "secret_key": "79hNcex4fyfQLcO",
+        "email": "bob@bob.com"
+    }
 
 
 

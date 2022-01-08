@@ -3,10 +3,11 @@ package model
 import "time"
 
 type Customer struct {
-	Id             int32  `json:"id" db:"id"`
+	// Id             int32  `json:"id,omitedempty" db:"id"`
 	CustomerId     string `json:"customer_id" db:"customer_id"`
 	FirstName      string `json:"first_name" db:"first_name"`
 	LastName       string `json:"last_name" db:"last_name"`
+	Email          string `json:"email"`
 	Avatar         string
 	Description    string    `json:"description"`
 	SecretKey      string    `json:"secret_key"`
