@@ -16,6 +16,7 @@ type CustomerTempAuthServiceInterface interface {
 
 type CustomerAuthServiceInterface interface {
 	CreatePermanentCustomer(model.Customer) (model.Customer, error)
+	GetCustomer(custoemrUUID string) (model.Customer, error)
 }
 
 type Service struct {

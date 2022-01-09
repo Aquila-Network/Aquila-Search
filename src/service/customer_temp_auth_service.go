@@ -3,6 +3,7 @@ package service
 import (
 	"aquiladb/src/model"
 	"aquiladb/src/repository"
+	"errors"
 	"math/rand"
 	"strings"
 	"time"
@@ -100,4 +101,27 @@ func GenerateTokenForTempCustomer(customer model.CustomerTemp) (string, error) {
 	})
 
 	return token.SignedString([]byte(signingKey))
+}
+
+func ParseTokenPermanentCustomer(accessToken string) (TokenClaimsForTempCustomer, error) {
+
+	var newTokenClaims TokenClaimsForTempCustomer
+
+	token, err := jwt.ParseWithClaims(accessToken, &TokenClaimsForTempCustomer{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("Invalid token.")
+		}
+
+		return []byte(signingKey), nil
+	})
+	if err != nil {
+		return newTokenClaims, err
+	}
+
+	claims, ok := token.Claims.(*TokenClaimsForTempCustomer)
+	if !ok {
+		return newTokenClaims, errors.New("token claims are not of type *tokenClaims")
+	}
+
+	return *claims, nil
 }

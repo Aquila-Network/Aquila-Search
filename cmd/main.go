@@ -69,6 +69,7 @@ func main() {
 	{
 		customer.POST("", controllers.CreateTempCustomer)
 		customer.PATCH("", middleware.UserIdentity, controllers.CreatePermanentCustomer)
+		customer.GET("", middleware.UserIdentity, controllers.GetCustomer)
 	}
 
 	server.Run(":" + envConfig.App.Port)

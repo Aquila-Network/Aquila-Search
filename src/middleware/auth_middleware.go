@@ -37,7 +37,7 @@ func UserIdentity(c *gin.Context) {
 		return
 	}
 
-	tokenClaims, err := service.ParseToken(headerParts[1])
+	tokenClaims, err := service.ParseTokenPermanentCustomer(headerParts[1])
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": err.Error(),
@@ -45,13 +45,7 @@ func UserIdentity(c *gin.Context) {
 		return
 	}
 
-	if !tokenClaims.IsActive {
-		// c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-		// 	"error": "Your account had been blocked. Please contact to admin.",
-		// })
-	}
-
-	// c.Set(userCtx, tokenClaims)
+	c.Set("customer_uuid", tokenClaims.CustomerUuid)
 	c.Next()
 }
 

@@ -39,7 +39,7 @@ func (c *CustomerAuth) CreatePermanentCustomer(customer model.Customer) (model.C
 		return customer, errors.New("Secret key is required 'secret_key'.")
 	}
 
-	customerTemp, err := c.repo.FindCustomerBySecretKey(customer.SecretKey)
+	customerTemp, err := c.repo.FindTempCustomerBySecretKey(customer.SecretKey)
 	if err != nil {
 		return customer, errors.New("Custoemer with this secret key not found.")
 	}
@@ -58,4 +58,11 @@ func (c *CustomerAuth) CreatePermanentCustomer(customer model.Customer) (model.C
 	fmt.Println(response)
 
 	return customer, nil
+}
+
+func (c *CustomerAuth) GetCustomer(customerUUID string) (model.Customer, error) {
+
+	// customer, err := c.repo.GetCustomerByUUID(customerUUID)
+
+	return c.repo.GetCustomerByUUID(customerUUID)
 }

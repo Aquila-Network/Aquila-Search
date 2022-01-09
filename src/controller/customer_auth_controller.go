@@ -3,6 +3,7 @@ package controller
 import (
 	"aquiladb/src/model"
 	"aquiladb/src/service"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -34,5 +35,21 @@ func (c *CustomerAuthController) CreatePermanentCustomer(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"customer": response,
+	})
+}
+
+func (c *CustomerAuthController) GetCustomer(ctx *gin.Context) {
+	customerId, exist := ctx.Get("customer_uuid")
+	if !exist {
+		NewErrorResponse(ctx, http.StatusUnauthorized, "Can not find customer id.")
+	}
+
+	customer, err := c.service.GetCustomer(fmt.Sprintf("%v", customerId))
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"customer": customer,
 	})
 }

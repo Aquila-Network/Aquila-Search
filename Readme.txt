@@ -76,6 +76,10 @@ Postman.
         "email": "bob@bob.com"
     }
 
+3. Get customer:
+    auth token - required
+    get /customer
+
 
 
 // ======================================
@@ -94,3 +98,9 @@ Run user seeder from migrations/seeder.sql file:
 ```bash
 $ SEEDER=`cat migrations/seeder.sql` && DATABASE_NAME=$(grep DB_NAME .env | cut -d '=' -f 2-) && docker exec -it postgres_db psql "postgresql://$DB_USER:$DB_PASS/${DATABASE_NAME}" --command="$SEEDER"
 ```
+
+
+{
+    "secret_key": "HouxrTHxtqJ7pcL",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDIzMzQzMTcsImlhdCI6MTY0MTcyOTUxNywiY3VzdG9tZXJfdXVpZCI6ImFiMzQ5M2Q5LTIxMzYtNDIzNi05YjA2LTI0ZTVkZmE4YmFkOCIsImlzX3Blcm1hbmVudCI6ZmFsc2V9.jUEsnc-irvNsI6gn5RMFqQGgOLyLjSMyybRRFu3I_iY"
+}

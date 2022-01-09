@@ -38,7 +38,7 @@ func (c *CustomerAuthPostgres) CreatePermanentCustomer(customer model.Customer) 
 	return "Hello from repository", nil
 }
 
-func (c CustomerAuthPostgres) FindCustomerBySecretKey(secretKey string) (model.CustomerTemp, error) {
+func (c *CustomerAuthPostgres) FindTempCustomerBySecretKey(secretKey string) (model.CustomerTemp, error) {
 
 	var custoemerTemp model.CustomerTemp
 
@@ -49,4 +49,22 @@ func (c CustomerAuthPostgres) FindCustomerBySecretKey(secretKey string) (model.C
 	)
 
 	return custoemerTemp, err
+}
+
+func (c *CustomerAuthPostgres) GetCustomerByUUID(customerUUID string) (model.Customer, error) {
+
+	var customer model.Customer
+
+	err := c.db.Get(
+		&customer,
+		"SELECT customer_id, first_name, last_name, email, description, secret_key, aquila_db_database_name, shared_hash, is_sharable, document_number, created_at FROM customers WHERE customer_id=$1",
+		customerUUID,
+	)
+	if err != nil {
+		// for debugging
+		return customer, err
+		// return customer, errors.New("Customer not found.")
+	}
+
+	return customer, nil
 }

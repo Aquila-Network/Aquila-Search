@@ -10,12 +10,12 @@ type Customer struct {
 	Email          string `json:"email"`
 	Avatar         string
 	Description    string    `json:"description"`
-	SecretKey      string    `json:"secret_key"`
-	AquilaDb       string    `json:"aquila_db"`
-	SharableHash   string    `json:"sharable_hash"`
-	IsSharable     bool      `json:"is_sharable"`
-	DocumentNumber string    `json:"document_number"`
+	SecretKey      string    `json:"secret_key" db:"secret_key"`
+	AquilaDb       string    `json:"aquila_db" db:"aquila_db_database_name"`
+	SharableHash   string    `json:"sharable_hash" db:"shared_hash"`
+	IsSharable     bool      `json:"is_sharable" db:"is_sharable"`
+	DocumentNumber string    `json:"document_number" db:"document_number"`
 	IsActive       bool      `json:"is_active" db:"is_active"`
-	CreatedAt      time.Time `json:"created_at"`
-	Token          string
+	CreatedAt      time.Time `json:"created_at" db:"created_at"`
+	Token          string    `json:"-"`
 }
