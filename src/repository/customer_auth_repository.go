@@ -2,6 +2,7 @@ package repository
 
 import (
 	"aquiladb/src/model"
+	"errors"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -61,9 +62,24 @@ func (c *CustomerAuthPostgres) GetCustomerByUUID(customerUUID string) (model.Cus
 		customerUUID,
 	)
 	if err != nil {
-		// for debugging
-		return customer, err
-		// return customer, errors.New("Customer not found.")
+		// return customer, err  // for debugging
+		return customer, errors.New("Customer not found.")
+	}
+
+	return customer, nil
+}
+
+func (c *CustomerAuthPostgres) GetCustomerBySecretKey(secretKey string) (model.Customer, error) {
+	var customer model.Customer
+
+	err := c.db.Get(
+		&customer,
+		"SELECT customer_id, first_name, last_name, email, description, secret_key, aquila_db_database_name, shared_hash, is_sharable, document_number, created_at FROM customers WHERE secret_key=$1",
+		secretKey,
+	)
+	if err != nil {
+		// return customer, err // for debugging
+		return customer, errors.New("Customer not found. Make sure that you are a permanent customer or check secret key.")
 	}
 
 	return customer, nil

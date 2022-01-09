@@ -53,3 +53,22 @@ func (c *CustomerAuthController) GetCustomer(ctx *gin.Context) {
 		"customer": customer,
 	})
 }
+
+func (c *CustomerAuthController) Auth(ctx *gin.Context) {
+	var customer model.Customer
+
+	if err := ctx.ShouldBindJSON(&customer); err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	response, err := c.service.Auth(customer.SecretKey)
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"token": response,
+	})
+}

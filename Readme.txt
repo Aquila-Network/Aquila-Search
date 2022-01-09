@@ -35,34 +35,6 @@ Run with live reload:
 Postman.
 -----------------
 
-1. Register user:
-    post /auth/register
-    {
-        "first_name": "Bob",
-        "last_name": "Bobin",
-        "email": "bob@bob.com",
-        "password": "123"
-    }
-    token will be in return
-
-2. Login user:
-    post /auth/login
-    {
-        "email": "bob@bob.com",
-        "password": "123"
-    }
-    token will be in return
-
-3. Protected route:
-    get /api/secret
-    you should use jwt token
-
-4. Admin route:
-    get /admin 
-    only for 
-    
-// ======================================
-
 1. Create temp customer:
     post /customer
 
@@ -80,6 +52,12 @@ Postman.
     auth token - required
     get /customer
 
+4. Auth:
+    post 
+    {
+        "secret_key": "tUJqvSphQiPLnUp"
+    }
+    token in response
 
 
 // ======================================
@@ -98,9 +76,3 @@ Run user seeder from migrations/seeder.sql file:
 ```bash
 $ SEEDER=`cat migrations/seeder.sql` && DATABASE_NAME=$(grep DB_NAME .env | cut -d '=' -f 2-) && docker exec -it postgres_db psql "postgresql://$DB_USER:$DB_PASS/${DATABASE_NAME}" --command="$SEEDER"
 ```
-
-
-{
-    "secret_key": "HouxrTHxtqJ7pcL",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDIzMzQzMTcsImlhdCI6MTY0MTcyOTUxNywiY3VzdG9tZXJfdXVpZCI6ImFiMzQ5M2Q5LTIxMzYtNDIzNi05YjA2LTI0ZTVkZmE4YmFkOCIsImlzX3Blcm1hbmVudCI6ZmFsc2V9.jUEsnc-irvNsI6gn5RMFqQGgOLyLjSMyybRRFu3I_iY"
-}

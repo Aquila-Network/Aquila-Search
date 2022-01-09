@@ -5,10 +5,19 @@ import (
 	"aquiladb/src/repository"
 	"errors"
 	"fmt"
+	"time"
+
+	"github.com/golang-jwt/jwt"
 )
 
 type CustomerAuth struct {
 	repo repository.CustomerAuthRepositoryInterface
+}
+
+type TokenClaimsCustomer struct {
+	jwt.StandardClaims
+	CustomerUuid string `json:"customer_uuid"`
+	IsPermanent  bool   `json:"is_permanent"`
 }
 
 func NewCustomerAuthService(repo repository.CustomerAuthRepositoryInterface) *CustomerAuth {
@@ -61,8 +70,40 @@ func (c *CustomerAuth) CreatePermanentCustomer(customer model.Customer) (model.C
 }
 
 func (c *CustomerAuth) GetCustomer(customerUUID string) (model.Customer, error) {
-
-	// customer, err := c.repo.GetCustomerByUUID(customerUUID)
-
 	return c.repo.GetCustomerByUUID(customerUUID)
+}
+
+func (c *CustomerAuth) Auth(secretKey string) (string, error) {
+
+	if len(secretKey) < 1 {
+		return "", errors.New("Secret key is required 'secret_key'.")
+	}
+
+	customer, err := c.repo.GetCustomerBySecretKey(secretKey)
+	if err != nil {
+		return "", err
+	}
+
+	customer.IsPermanent = true
+	token, err := GenerateTokenCustomer(customer)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+func GenerateTokenCustomer(customer model.Customer) (string, error) {
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &TokenClaimsCustomer{
+		jwt.StandardClaims{
+			// it should be lifetime
+			// ExpiresAt: time.Now().Add(tokenTTlForTemporaryUser).Unix(),
+			IssuedAt: time.Now().Unix(),
+		},
+		customer.CustomerId,
+		customer.IsPermanent,
+	})
+
+	return token.SignedString([]byte(signingKey))
 }

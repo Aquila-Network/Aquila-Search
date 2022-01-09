@@ -18,6 +18,7 @@ type CustomerTempAuthInterface interface {
 type CustomerAuthInterface interface {
 	CreatePermanentCustomer(c *gin.Context)
 	GetCustomer(c *gin.Context)
+	Auth(c *gin.Context)
 }
 
 type Controller struct {
