@@ -28,6 +28,18 @@ $ MIGRATIONS=`cat migrations/migration.sql` && DATABASE_NAME=$(grep DB_NAME .env
 $ docker-compose down
 ```
 
+## Swagger
+
+Generate or update swagger docks:
+```bash
+$ ~/go/bin/swag init -g cmd/main.go --output swagger_docs --exclude logs/, .database/
+```
+
+In the browser type:
+```bash
+http://localhost:8000/swagger/index.html#/
+```
+
 ## Notes.
 
 All credentials you can find in .env file.

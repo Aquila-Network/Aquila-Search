@@ -14,7 +14,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+
+	_ "aquiladb/swagger_docs"
+
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
+
+// @title Aquila DB
+// @version 1.0
+// @description Aquila DB
 
 func main() {
 
@@ -72,7 +81,7 @@ func main() {
 		customer.GET("", middleware.UserIdentity, controllers.GetCustomer)
 		customer.POST("/auth", controllers.Auth)
 	}
-
+	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	server.Run(":" + envConfig.App.Port)
 
 }

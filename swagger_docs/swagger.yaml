@@ -1,0 +1,26 @@
+info:
+  contact: {}
+  description: Aquila DB
+  title: Aquila DB
+  version: "1.0"
+paths:
+  /customer:
+    get:
+      description: Get customer
+      responses: {}
+      summary: Get customer
+      tags:
+      - Get customer
+    patch:
+      description: Create permanent customer
+      responses: {}
+      summary: Create permanent customer
+      tags:
+      - create permanent customer
+    post:
+      description: Create temp customer
+      responses: {}
+      summary: Create temp customer
+      tags:
+      - create temp customer
+swagger: "2.0"

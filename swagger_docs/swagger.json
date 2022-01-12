@@ -1,0 +1,37 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Aquila DB",
+        "title": "Aquila DB",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/customer": {
+            "get": {
+                "description": "Get customer",
+                "tags": [
+                    "Get customer"
+                ],
+                "summary": "Get customer",
+                "responses": {}
+            },
+            "post": {
+                "description": "Create temp customer",
+                "tags": [
+                    "create temp customer"
+                ],
+                "summary": "Create temp customer",
+                "responses": {}
+            },
+            "patch": {
+                "description": "Create permanent customer",
+                "tags": [
+                    "create permanent customer"
+                ],
+                "summary": "Create permanent customer",
+                "responses": {}
+            }
+        }
+    }
+}

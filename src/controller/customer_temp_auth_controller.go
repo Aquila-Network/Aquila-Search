@@ -17,6 +17,10 @@ func NewCustomerTempAuthController(service service.CustomerTempAuthServiceInterf
 	}
 }
 
+// @Summary Create temp customer
+// @Tags create temp customer
+// @Description Create temp customer
+// @Router /customer [post]
 func (c CustomerTempAuthController) CreateTempCustomer(ctx *gin.Context) {
 	customer, err := c.service.CreateTempCustomer()
 	if err != nil {

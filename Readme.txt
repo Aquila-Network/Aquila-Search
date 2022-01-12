@@ -9,6 +9,7 @@ Install dependencies:
     $ go get github.com/jmoiron/sqlx
     $ go get github.com/golobby/dotenv
     $ go get -u github.com/golang-jwt/jwt
+    $ go get -u github.com/swaggo/swag/cmd/swag
 
 // ======================================
 
@@ -61,6 +62,9 @@ Postman.
 
 
 // ======================================
+
+Swagger:
+    $ ~/go/bin/swag init -g cmd/main.go --output swagger_docs --exclude logs/, .database/
 
 // ======================================
 // ======================================

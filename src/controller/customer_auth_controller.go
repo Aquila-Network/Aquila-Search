@@ -19,6 +19,10 @@ func NewCustomerAuthController(service service.CustomerAuthServiceInterface) *Cu
 	}
 }
 
+// @Summary Create permanent customer
+// @Tags create permanent customer
+// @Description Create permanent customer
+// @Router /customer [patch]
 func (c *CustomerAuthController) CreatePermanentCustomer(ctx *gin.Context) {
 	var customer model.Customer
 
@@ -38,6 +42,10 @@ func (c *CustomerAuthController) CreatePermanentCustomer(ctx *gin.Context) {
 	})
 }
 
+// @Summary Get customer
+// @Tags Get customer
+// @Description Get customer
+// @Router /customer [get]
 func (c *CustomerAuthController) GetCustomer(ctx *gin.Context) {
 	customerId, exist := ctx.Get("customer_uuid")
 	if !exist {
@@ -54,6 +62,10 @@ func (c *CustomerAuthController) GetCustomer(ctx *gin.Context) {
 	})
 }
 
+// @Summary Auth
+// @Tags Auth
+// @Description Auth
+// @Router /customer [post]
 func (c *CustomerAuthController) Auth(ctx *gin.Context) {
 	var customer model.Customer
 
