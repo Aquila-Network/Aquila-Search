@@ -34,11 +34,45 @@ var doc = `{
             },
             "post": {
                 "description": "Create temp customer",
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "create temp customer"
                 ],
                 "summary": "Create temp customer",
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.errorResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/controller.errorResponse"
+                        }
+                    }
+                }
             },
             "patch": {
                 "description": "Create permanent customer",
@@ -47,6 +81,19 @@ var doc = `{
                 ],
                 "summary": "Create permanent customer",
                 "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "controller.errorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
             }
         }
     }

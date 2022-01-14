@@ -20,6 +20,12 @@ func NewCustomerTempAuthController(service service.CustomerTempAuthServiceInterf
 // @Summary Create temp customer
 // @Tags create temp customer
 // @Description Create temp customer
+// @Produce  json
+// @Success 200 {string} secret_key 1
+// @Success 200 {string} token 1
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
 // @Router /customer [post]
 func (c CustomerTempAuthController) CreateTempCustomer(ctx *gin.Context) {
 	customer, err := c.service.CreateTempCustomer()

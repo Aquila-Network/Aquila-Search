@@ -1,3 +1,11 @@
+definitions:
+  controller.errorResponse:
+    properties:
+      error:
+        type: string
+      status_code:
+        type: integer
+    type: object
 info:
   contact: {}
   description: Aquila DB
@@ -19,7 +27,29 @@ paths:
       - create permanent customer
     post:
       description: Create temp customer
-      responses: {}
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/controller.errorResponse'
       summary: Create temp customer
       tags:
       - create temp customer

@@ -87,7 +87,7 @@ func main() {
 }
 
 func SetupLogOutput() {
-	err := os.MkdirAll("logs", 8644)
+	err := os.MkdirAll("logs", 0777)
 	if err != nil {
 		panic(err)
 	}
