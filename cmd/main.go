@@ -4,6 +4,7 @@ import (
 	"aquiladb/src/config"
 	"aquiladb/src/controller"
 	"aquiladb/src/middleware"
+	moduledb "aquiladb/src/module_db"
 	"aquiladb/src/repository"
 	"aquiladb/src/service"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -47,6 +49,15 @@ func main() {
 		ctx.AbortWithStatusJSON(400, gin.H{"errorResponsemessage": "kgjhggkg"})
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Aquila DB new technologies.",
+		})
+	})
+
+	// test route for debugging db module
+	server.GET("/test", func(ctx *gin.Context) {
+		// create aquila db
+		moduledb.CreateAquilaDatabase()
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "See the result in the console.",
 		})
 	})
 
@@ -91,7 +102,7 @@ func SetupLogOutput() {
 	if err != nil {
 		panic(err)
 	}
-
-	f, _ := os.Create("logs/gin.log")
+	fileName := fmt.Sprintf("logs/%v_gin.log", time.Now().Format("01_02_2006"))
+	f, _ := os.Create(fileName)
 	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 }
