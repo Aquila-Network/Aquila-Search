@@ -59,13 +59,17 @@ Postman.
         "secret_key": "tUJqvSphQiPLnUp"
     }
     token in response
+----------------------------------------------------------
 
+Aquila DB.
+
+1. Create database:
+    post /aquila/create_db
+
+2. Doc insert:
+    post /aquila/doc/insert
 
 // ======================================
-
-Swagger:
-    $ ~/go/bin/swag init -g cmd/main.go --output swagger_docs --exclude logs/, .database/
-
 // ======================================
 // ======================================
 // ======================================

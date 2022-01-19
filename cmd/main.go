@@ -4,7 +4,6 @@ import (
 	"aquiladb/src/config"
 	"aquiladb/src/controller"
 	"aquiladb/src/middleware"
-	moduledb "aquiladb/src/module_db"
 	"aquiladb/src/repository"
 	"aquiladb/src/service"
 	"fmt"
@@ -46,20 +45,18 @@ func main() {
 	// server.Use(gin.Recovery(), gin.Logger())
 
 	server.GET("/", func(ctx *gin.Context) {
-		ctx.AbortWithStatusJSON(400, gin.H{"errorResponsemessage": "kgjhggkg"})
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Aquila DB new technologies.",
 		})
 	})
 
-	// test route for debugging db module
-	server.GET("/test", func(ctx *gin.Context) {
-		// create aquila db
-		moduledb.CreateAquilaDatabase()
-		ctx.JSON(http.StatusOK, gin.H{
-			"message": "See the result in the console.",
-		})
-	})
+	// Aquila DB group
+	// remove it
+	aquila := server.Group("/aquila")
+	{
+		aquila.POST("/create_db", controllers.CreateAquilaDB)
+		aquila.POST("/doc/insert", controllers.DocInsert)
+	}
 
 	auth := server.Group("/auth")
 	{
@@ -85,6 +82,7 @@ func main() {
 		})
 	}
 
+	// customer routes
 	customer := server.Group("/customer")
 	{
 		customer.POST("", controllers.CreateTempCustomer)
@@ -92,6 +90,7 @@ func main() {
 		customer.GET("", middleware.UserIdentity, controllers.GetCustomer)
 		customer.POST("/auth", controllers.Auth)
 	}
+
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	server.Run(":" + envConfig.App.Port)
 

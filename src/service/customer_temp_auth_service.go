@@ -5,7 +5,6 @@ import (
 	"aquiladb/src/repository"
 	"errors"
 	"math/rand"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -49,16 +48,16 @@ func NewCustomerTempAuthService(repo repository.CustomerTempAuthRepositoryInterf
 	}
 }
 
-func (c CustomerTempAuth) CreateTempCustomer() (model.CustomerTemp, error) {
+func (c CustomerTempAuth) CreateTempCustomer(customer model.CustomerTemp) (model.CustomerTemp, error) {
 
-	var customer model.CustomerTemp
+	// var customer model.CustomerTemp
 
-	randomAdjective := ADJECTIVES[rand.Intn(len(ADJECTIVES))]
-	randomNoun := NOUNS[rand.Intn(len(NOUNS))]
+	// randomAdjective := ADJECTIVES[rand.Intn(len(ADJECTIVES))]
+	// randomNoun := NOUNS[rand.Intn(len(NOUNS))]
 
-	customer.FirstName = strings.Title(randomAdjective)
-	customer.LastName = strings.Title(randomNoun)
-	customer.SecretKey = KeyGenerate(15)
+	// customer.FirstName = strings.Title(randomAdjective)
+	// customer.LastName = strings.Title(randomNoun)
+	// customer.SecretKey = KeyGenerate(15)
 
 	createdCustomer, err := c.repo.RegisterTempCustomer(customer)
 	if err != nil {

@@ -20,10 +20,11 @@ func NewCustomerTempAuthRepository(db *sqlx.DB) *CustomerTempAuthPostgres {
 func (c CustomerTempAuthPostgres) RegisterTempCustomer(customer model.CustomerTemp) (*model.CustomerTemp, error) {
 
 	row := c.db.QueryRow(
-		"INSERT INTO customers_temp (first_name, last_name, secret_key) values ($1, $2, $3) RETURNING id, customer_id",
+		"INSERT INTO customers_temp (first_name, last_name, secret_key, aquila_db_database_name) values ($1, $2, $3, $4) RETURNING id, customer_id",
 		customer.FirstName,
 		customer.LastName,
 		customer.SecretKey,
+		customer.AquilaDb,
 	)
 	if err := row.Scan(&customer.Id, &customer.CustomerId); err != nil {
 		fmt.Println("Error create customer.")

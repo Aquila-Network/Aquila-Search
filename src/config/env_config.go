@@ -8,6 +8,9 @@ import (
 	"github.com/golobby/dotenv"
 )
 
+// use config globally with this variable
+var GlobalConfig *ConfigEnv
+
 type ConfigEnv struct {
 	Debug bool `env:"DEBUG"`
 	App   struct {
@@ -26,21 +29,25 @@ type ConfigEnv struct {
 		Salt    string `env:"HASH_SALT"`
 		SignKey string `env:"HASH_SIGN_KEY"`
 	}
+	AquilaDB struct {
+		Host string `env:"AQUILA_DB_HOST"`
+		Port string `env:"AQUILA_DB_PORT"`
+	}
 }
 
 func InitEnvConfig() *ConfigEnv {
 
-	c := &ConfigEnv{}
+	GlobalConfig = &ConfigEnv{}
 	file, err := os.Open(".env")
 	if err != nil {
 		fmt.Println("Failed to load .env file")
 		log.Fatalln(err)
 	}
-	err = dotenv.NewDecoder(file).Decode(c)
+	err = dotenv.NewDecoder(file).Decode(GlobalConfig)
 	if err != nil {
 		fmt.Println("Failed to read .env file")
 		log.Fatalln(err)
 	}
 
-	return c
+	return GlobalConfig
 }

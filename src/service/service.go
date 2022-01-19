@@ -11,7 +11,7 @@ type AuthServiceInterface interface {
 }
 
 type CustomerTempAuthServiceInterface interface {
-	CreateTempCustomer() (model.CustomerTemp, error)
+	CreateTempCustomer(model.CustomerTemp) (model.CustomerTemp, error)
 }
 
 type CustomerAuthServiceInterface interface {
