@@ -53,7 +53,74 @@ if err != nil {
 
 // ====================================================
 
+2. Doc Insert:
 
+{
+   "data": {
+       "docs": [
+           {
+           "payload":
+               {
+                   "metadata": {
+                       "name":"name1",
+                       "age": 20
+                   },
+                   "code": [0.1, 0.2, 0.3]
+               }
+           },
+           {
+           "payload":
+               {
+                   "metadata": {
+                       "name":"name2",
+                       "age": 30
+                   },
+                   "code": [0.4, 0.5, 0.6]
+               }
+           }
+       ],
+       "database_name": "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7"
+   },
+   "signature": "secret"
+}
+
+Example struct:
+-------------------
+
+docInsert := &DocInsertStruct{
+		Data: DatatDocInsertStruct{
+			Docs: []DocsStruct{
+				{
+					Payload: PayloadStruct{
+						Metadata: MetadataStructDocInsert{
+							Name: "name1",
+							Age:  20,
+						},
+						Code: []float32{0.1, 0.2, 0.3},
+					},
+				},
+				{
+					Payload: PayloadStruct{
+						Metadata: MetadataStructDocInsert{
+							Name: "name2",
+							Age:  20,
+						},
+						Code: []float32{0.4, 0.5, 0.6},
+					},
+				},
+			},
+			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
+		},
+		Signature: "secret",
+	}
+
+	data, err := json.Marshal(docInsert)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// another way to pass reader to post
+	// reader := bytes.NewReader(data)
 
 
 

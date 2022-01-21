@@ -24,6 +24,7 @@ type CustomerAuthInterface interface {
 type AquilaDBInterface interface {
 	CreateAquilaDB(c *gin.Context)
 	DocInsert(c *gin.Context)
+	DocDelete(c *gin.Context)
 }
 
 type Controller struct {

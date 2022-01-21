@@ -16,6 +16,11 @@ type CreateDBResponse struct {
 }
 
 type DocInsert struct {
+	Url  string `json:"url"`
+	Html string `json:"html"`
+}
+
+type DocDelete struct {
 	Ids     []string `json:"ids"`
 	Success bool     `json:"success"`
 }
@@ -27,6 +32,7 @@ func NewAquilaDBController() *AquilaDBController {
 	return &AquilaDBController{}
 }
 
+// no need of it because aquila will create automatically
 func (a *AquilaDBController) CreateAquilaDB(ctx *gin.Context) {
 	// var createDB *CreateDBResponse
 	// jsonDataBytes, err := ioutil.ReadAll(ctx.Request.Body)
@@ -45,16 +51,34 @@ func (a *AquilaDBController) CreateAquilaDB(ctx *gin.Context) {
 }
 
 func (a *AquilaDBController) DocInsert(ctx *gin.Context) {
-	var docInsert *DocInsert
+
+	// var docInsert *DocInsert
 	jsonDataBytes, err := ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	response := moduledb.DocInsert(jsonDataBytes)
-	json.Unmarshal(response, &docInsert)
+	// json.Unmarshal(response, &docInsert)
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"response": &docInsert,
+		"response": response,
+	})
+}
+
+func (a *AquilaDBController) DocDelete(ctx *gin.Context) {
+
+	var docDelete *DocDelete
+	// jsonDataBytes, err := ioutil.ReadAll(ctx.Request.Body)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	response := moduledb.DocDelete()
+	json.Unmarshal(response, &docDelete)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message":  "bla",
+		"response": &docDelete,
 	})
 }

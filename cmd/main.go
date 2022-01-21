@@ -55,14 +55,15 @@ func main() {
 	aquila := server.Group("/aquila")
 	{
 		aquila.POST("/create_db", controllers.CreateAquilaDB)
-		aquila.POST("/doc/insert", controllers.DocInsert)
+		aquila.POST("/doc_insert", controllers.DocInsert)
+		aquila.POST("/doc_delete", controllers.DocDelete)
 	}
 
-	auth := server.Group("/auth")
-	{
-		auth.POST("/register", controllers.Register)
-		auth.POST("/login", controllers.Login)
-	}
+	// auth := server.Group("/auth")
+	// {
+	// 	auth.POST("/register", controllers.Register)
+	// 	auth.POST("/login", controllers.Login)
+	// }
 
 	api := server.Group("/api", middleware.UserIdentity)
 	{

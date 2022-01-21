@@ -30,8 +30,11 @@ type ConfigEnv struct {
 		SignKey string `env:"HASH_SIGN_KEY"`
 	}
 	AquilaDB struct {
-		Host string `env:"AQUILA_DB_HOST"`
-		Port string `env:"AQUILA_DB_PORT"`
+		Host          string `env:"AQUILA_DB_HOST"`
+		Port          string `env:"AQUILA_DB_PORT"`
+		MercuryPort   string `env:"AQUILA_MERCURY_PORT"`
+		TxPickPort    string `env:"AQUILA_TXTPICK_PORT"`
+		AquilaHubPort string `env:"AQUILA_HUB_PORT"`
 	}
 }
 
