@@ -77,12 +77,12 @@ func SendContentToTxPick(mercury *MercuryResponseStruct) []uint8 {
 		print(err)
 	}
 
-	fmt.Println(string(body)) // will write response in the console
+	// fmt.Println(string(body)) // will write response in the console
 
 	return body
 }
 
-func SendTextToAquilaHub(t *TxPickResponseStruct) {
+func SendTextToAquilaHub(t *TxPickResponseStruct) []uint8 {
 	var configEnv = config.GlobalConfig
 
 	createURL := fmt.Sprintf("http://%v:%v/compress",
@@ -124,10 +124,66 @@ func SendTextToAquilaHub(t *TxPickResponseStruct) {
 
 	fmt.Println(string(body)) // will write response in the console
 
-	// return body
+	return body
 }
 
-func DocInsert(jsonDataBytes []byte) *MercuryResponseStruct {
+func SendVectors(vectors *AquilaHubResponseStruct) []uint8 {
+	var configEnv = config.GlobalConfig
+
+	createURL := fmt.Sprintf("http://%v:%v/db/doc/insert",
+		configEnv.AquilaDB.Host,
+		configEnv.AquilaDB.AquilaDbPort,
+	)
+
+	docInsert := &DocInsertStruct{
+		Data: DatatDocInsertStruct{
+			Docs: []DocsStruct{
+				{
+					Payload: PayloadStruct{
+						Metadata: MetadataStructDocInsert{
+							Name: "name1",
+							Age:  20,
+						},
+						Code: vectors.Vectors,
+					},
+				},
+			},
+			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
+		},
+		Signature: "secret",
+	}
+
+	fmt.Println(docInsert)
+
+	var buf bytes.Buffer
+	err := json.NewEncoder(&buf).Encode(docInsert)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	req, _ := json.Marshal(docInsert)
+
+	resp, err := http.Post(
+		createURL,
+		// "https://httpbin.org/post",
+		"application/json",
+		bytes.NewBuffer(req),
+	)
+	if err != nil {
+		print(err)
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		print(err)
+	}
+
+	fmt.Println(string(body)) // will write response in the console
+
+	return body
+}
+
+func DocInsert(jsonDataBytes []byte) *DocInsertResponseStruct {
 
 	var mercuryResponseStruct *MercuryResponseStruct
 	responseMercury := SendHTMLForParsingToMercury(jsonDataBytes)
@@ -137,9 +193,15 @@ func DocInsert(jsonDataBytes []byte) *MercuryResponseStruct {
 	responseTxPick := SendContentToTxPick(mercuryResponseStruct)
 	json.Unmarshal(responseTxPick, &txPick)
 
-	SendTextToAquilaHub(txPick)
+	var aquilaHubResponseStruct *AquilaHubResponseStruct
+	responseAquilaHub := SendTextToAquilaHub(txPick)
+	json.Unmarshal(responseAquilaHub, &aquilaHubResponseStruct)
 
-	return mercuryResponseStruct
+	var docInsertResponse *DocInsertResponseStruct
+	aquilaDbResponse := SendVectors(aquilaHubResponseStruct)
+	json.Unmarshal(aquilaDbResponse, &docInsertResponse)
+
+	return docInsertResponse
 
 	// var configEnv = config.GlobalConfig
 

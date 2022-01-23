@@ -31,7 +31,7 @@ type ConfigEnv struct {
 	}
 	AquilaDB struct {
 		Host          string `env:"AQUILA_DB_HOST"`
-		Port          string `env:"AQUILA_DB_PORT"`
+		AquilaDbPort  string `env:"AQUILA_DB_PORT"`
 		MercuryPort   string `env:"AQUILA_MERCURY_PORT"`
 		TxPickPort    string `env:"AQUILA_TXTPICK_PORT"`
 		AquilaHubPort string `env:"AQUILA_HUB_PORT"`

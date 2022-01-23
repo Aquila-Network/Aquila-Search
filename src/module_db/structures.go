@@ -28,6 +28,11 @@ type DocInsertStruct struct {
 	Signature string               `json:"signature"`
 }
 
+type DocInsertResponseStruct struct {
+	Ids     []string `json:"ids"`
+	Success bool     `json:"success"`
+}
+
 // =====================================
 
 type MercuryDataStruct struct {
@@ -53,7 +58,7 @@ type MercuryResponseStruct struct {
 
 // =====================================
 
-// Send content to txpick
+// Request txpick
 
 type TxPickRequestStruct struct {
 	Url  string `json:"url"`
@@ -71,7 +76,7 @@ type TxPickResponseStruct struct {
 
 // =====================================
 
-// Aquila hub request
+// Request Aquila Hub
 
 type AquilaDataRequestStruct struct {
 	Text         []string `json:"text"`
@@ -80,4 +85,11 @@ type AquilaDataRequestStruct struct {
 
 type AquilaHubRequestStruct struct {
 	Data AquilaDataRequestStruct `json:"data"`
+}
+
+// Response Aquila Hub
+
+type AquilaHubResponseStruct struct {
+	Vectors []float32
+	Success bool
 }

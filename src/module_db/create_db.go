@@ -43,7 +43,7 @@ func CreateAquilaDatabase(createDb *CreateDbStruct) *ResponseAquilaDbStruct {
 
 	createURL := fmt.Sprintf("http://%v:%v/db/create",
 		configEnv.AquilaDB.Host,
-		configEnv.AquilaDB.Port,
+		configEnv.AquilaDB.AquilaDbPort,
 	)
 
 	resp, err := http.Post(

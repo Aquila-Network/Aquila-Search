@@ -50,7 +50,7 @@ func DocDelete() []uint8 {
 
 	createURL := fmt.Sprintf("http://%v:%v/db/doc/delete",
 		configEnv.AquilaDB.Host,
-		configEnv.AquilaDB.Port,
+		configEnv.AquilaDB.AquilaDbPort,
 	)
 
 	resp, err := http.Post(
