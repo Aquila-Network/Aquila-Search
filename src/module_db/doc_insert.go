@@ -18,7 +18,7 @@ func SendHTMLForParsingToMercury(jsonDataBytes []byte) []uint8 {
 		configEnv.AquilaDB.MercuryPort,
 	)
 
-	// fmt.Println("=====================================")
+	// fmt.Println("Mercury =====================================")
 	// fmt.Println(createURL)
 
 	resp, err := http.Post(
@@ -77,7 +77,7 @@ func SendContentToTxPick(mercury *MercuryResponseStruct) []uint8 {
 		print(err)
 	}
 
-	// fmt.Println(string(body)) // will write response in the console
+	fmt.Println(string(body)) // will write response in the console
 
 	return body
 }
@@ -90,12 +90,18 @@ func SendTextToAquilaHub(t *TxPickResponseStruct) []uint8 {
 		configEnv.AquilaDB.AquilaHubPort,
 	)
 
+	fmt.Println("AquilaHub =====================================")
+	fmt.Println(createURL)
+
 	aquilaHubRequest := &AquilaHubRequestStruct{
 		Data: AquilaDataRequestStruct{
 			Text:         t.Result,
 			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
 		},
 	}
+
+	fmt.Println("Aquila hub request =====================================")
+	fmt.Println(aquilaHubRequest)
 
 	fmt.Println(aquilaHubRequest)
 
@@ -122,6 +128,7 @@ func SendTextToAquilaHub(t *TxPickResponseStruct) []uint8 {
 		print(err)
 	}
 
+	fmt.Println("===============================")
 	fmt.Println(string(body)) // will write response in the console
 
 	return body

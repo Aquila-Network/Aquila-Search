@@ -93,3 +93,18 @@ type AquilaHubResponseStruct struct {
 	Vectors []float32
 	Success bool
 }
+
+// =====================================
+
+// Db Search:
+
+type DataSearchStruct struct {
+	Matrix       [][]float64 `json:"matrix"`
+	K            int         `json:"k"`
+	R            int         `json:"r"`
+	DatabaseName string      `json:"database_name"`
+}
+
+type SearchAquilaDbStruct struct {
+	Data DataSearchStruct `json:"data"`
+}

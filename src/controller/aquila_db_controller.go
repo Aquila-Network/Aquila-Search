@@ -25,6 +25,23 @@ type DocDelete struct {
 	Success bool     `json:"success"`
 }
 
+type MetadataSearchStruct struct {
+	Age  int
+	Name string
+}
+
+type DocSearchData struct {
+	Cid      string
+	Id       int
+	Code     []float32
+	Metadata MetadataSearchStruct
+}
+
+type DocSearch struct {
+	Dist [][]float64
+	Docs [][]DocSearchData
+}
+
 type AquilaDBController struct {
 }
 
@@ -80,5 +97,15 @@ func (a *AquilaDBController) DocDelete(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"message":  "bla",
 		"response": &docDelete,
+	})
+}
+
+func (a *AquilaDBController) DocSearch(ctx *gin.Context) {
+	// var docSearch *DocSearch
+
+	moduledb.Search()
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Look to the console.",
+		// "response": &docDelete,
 	})
 }

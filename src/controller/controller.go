@@ -25,6 +25,7 @@ type AquilaDBInterface interface {
 	CreateAquilaDB(c *gin.Context)
 	DocInsert(c *gin.Context)
 	DocDelete(c *gin.Context)
+	DocSearch(c *gin.Context)
 }
 
 type Controller struct {

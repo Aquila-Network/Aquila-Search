@@ -227,3 +227,44 @@ Make sure to create database like in the first step:
 
     with tokek vectors
     every array is single object in payload
+
+
+
+// =========================================
+
+delete
+http://192.168.0.101:5001/db/doc/delete
+request:
+{ 
+    "data": {
+        "ids": [
+            "FBnbtgBaGpZs4VVMbyxVhSWus37Sg4jf8N72yDSsri1B"
+        ], 
+        "database_name": "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7" 
+    }
+}
+
+response:
+{
+    "ids": [
+        "FBnbtgBaGpZs4VVMbyxVhSWus37Sg4jf8N72yDSsri1B"
+    ],
+    "success": true
+}
+
+
+// ======================================
+
+http://192.168.0.101:5001/db/search
+Get 
+{ 
+    "data": {
+        "matrix": [
+            [
+                -0.01806008443236351,-0.17380790412425995,0.03992759436368942,0.43514639139175415
+            ]
+        ], 
+        "k": 10,
+        "database_name": "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7"
+    }
+}
