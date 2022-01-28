@@ -1,57 +1,39 @@
 package moduledb
 
 import (
-	"aquiladb/src/config"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
-func Search() []uint8 {
-	var configEnv = config.GlobalConfig
+// Searh method
+// Response - vectors
+func Search(searchBody *SearchAquilaDbRequestStruct, url string) (*DocSearchResponseStruct, error) {
 
-	createURL := fmt.Sprintf("http://%v:%v/db/search",
-		configEnv.AquilaDB.Host,
-		configEnv.AquilaDB.AquilaDbPort,
-	)
+	var docSearchResponse *DocSearchResponseStruct
 
-	fmt.Println("=====================================")
-	fmt.Println(createURL)
-
-	// pattern
-	// https://www.geeksforgeeks.org/slice-of-slices-in-golang/
-	matrix := make([][]float64, 1)
-	matrix[0] = make([]float64, 1)
-	matrix[0] = []float64{
-		-0.01806008443236351, -0.17380790412425995, 0.03992759436368942, 0.43514639139175415,
-	}
-
-	searchBody := &SearchAquilaDbStruct{
-		Data: DataSearchStruct{
-			Matrix:       matrix,
-			K:            10,
-			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
-		},
-	}
-
-	// get
+	// get request
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(searchBody)
-	req, err := http.NewRequest(http.MethodGet, createURL, &buf)
 	if err != nil {
-		panic(err)
+		return docSearchResponse, err
 	}
-	fmt.Println("=====================================")
-	fmt.Printf("%+v\n", req)
-	fmt.Println("=====================================")
-	fmt.Println(req)
+
+	req, err := http.NewRequest(http.MethodGet, url, &buf)
+	if err != nil {
+		return docSearchResponse, err
+	}
+
+	// add header to GET request
+	req.Header = map[string][]string{
+		"Content-Type": {"application/json"},
+	}
 
 	resp, err := http.DefaultClient.Do(req)
 
 	/*
-		// post
+		// post request
 		var buf bytes.Buffer
 		err := json.NewEncoder(&buf).Encode(searchBody)
 		if err != nil {
@@ -71,12 +53,15 @@ func Search() []uint8 {
 		}
 		defer resp.Body.Close()
 	*/
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		print(err)
+		return docSearchResponse, err
 	}
 
-	fmt.Println(string(body)) // will write response in the console
+	// fmt.Println(string(body)) // will write response in the console
 
-	return body
+	json.Unmarshal(body, &docSearchResponse)
+
+	return docSearchResponse, nil
 }

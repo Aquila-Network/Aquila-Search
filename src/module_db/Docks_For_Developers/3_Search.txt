@@ -1,0 +1,49 @@
+#################################################
+#   Search
+#################################################
+
+GET request:
+---------------------
+
+http://localhost:5001/db/search
+
+header:
+        Content-Type: application/json
+Get body:
+{ 
+    "data": {
+        "matrix": [
+            [
+                -0.01806008443236351,-0.17380790412425995,0.03992759436368942,0.43514639139175415
+            ]
+        ], 
+        "k": 10,
+        "R": 0,
+        "database_name": "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7"
+    }
+}
+
+Example request struct:
+-------------------------
+
+    // pattern
+	// https://www.geeksforgeeks.org/slice-of-slices-in-golang/
+
+	matrix := make([][]float64, 1)
+	matrix[0] = make([]float64, 1)
+	matrix[0] = []float64{
+		-0.01806008443236351, -0.17380790412425995, 0.03992759436368942, 0.43514639139175415,
+	}
+	searchBody := &moduledb.SearchAquilaDbRequestStruct{
+		Data: moduledb.DataSearchStruct{
+			Matrix:       matrix,
+			K:            10,
+			R:            0,
+			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
+		},
+	}
+
+// =========================================================
+For debugging post request use this url:
+Post data will send in response
+https://httpbin.org/post

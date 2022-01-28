@@ -1,7 +1,6 @@
 package moduledb
 
 import (
-	"aquiladb/src/config"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -10,49 +9,47 @@ import (
 	"net/http"
 )
 
-func SendHTMLForParsingToMercury(jsonDataBytes []byte) []uint8 {
-	var configEnv = config.GlobalConfig
+// Send row html to mercury to parse
+// in response will be json.
+// We need take url and content field
+func SendHTMLForParsingToMercury(mercuryRequest *MercuryRequestStruct, url string) (*MercuryResponseStruct, error) {
 
-	createURL := fmt.Sprintf("http://%v:%v/process",
-		configEnv.AquilaDB.Host,
-		configEnv.AquilaDB.MercuryPort,
-	)
+	var mercuryResponse *MercuryResponseStruct
 
-	// fmt.Println("Mercury =====================================")
-	// fmt.Println(createURL)
+	var buf bytes.Buffer
+	err := json.NewEncoder(&buf).Encode(mercuryRequest)
+	if err != nil {
+		return mercuryResponse, err
+	}
+	req, _ := json.Marshal(mercuryRequest)
 
 	resp, err := http.Post(
-		createURL,
-		// "https://httpbin.org/post",
+		url,
 		"application/json",
-		bytes.NewBuffer(jsonDataBytes),
+		bytes.NewBuffer(req),
 	)
 	if err != nil {
-		print(err)
+		return mercuryResponse, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		print(err)
+		return mercuryResponse, err
 	}
 
 	fmt.Println(string(body)) // will write response in the console
 
-	return body
+	// unmarshal response and return struct
+	json.Unmarshal(body, &mercuryResponse)
+
+	return mercuryResponse, nil
 }
 
-func SendContentToTxPick(mercury *MercuryResponseStruct) []uint8 {
-	var configEnv = config.GlobalConfig
+// Send content to txpick server
+// Response will be an array of text
+func SendContentToTxPick(txPickRequest *TxPickRequestStruct, url string) (*TxPickResponseStruct, error) {
 
-	createURL := fmt.Sprintf("http://%v:%v/process",
-		configEnv.AquilaDB.Host,
-		configEnv.AquilaDB.TxPickPort,
-	)
-
-	txPickRequest := &TxPickRequestStruct{
-		Url:  mercury.Data.Url,
-		Html: mercury.Data.Content,
-	}
+	var txPickResponse *TxPickResponseStruct
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(txPickRequest)
@@ -60,179 +57,104 @@ func SendContentToTxPick(mercury *MercuryResponseStruct) []uint8 {
 		log.Fatal(err)
 	}
 
-	req, _ := json.Marshal(txPickRequest)
+	req, err := json.Marshal(txPickRequest)
+	if err != nil {
+		return txPickResponse, err
+	}
 
 	resp, err := http.Post(
-		createURL,
-		// "https://httpbin.org/post",
+		url,
+		// "https://httpbin.org/post", // route for debugging request
 		"application/json",
 		bytes.NewBuffer(req),
 	)
 	if err != nil {
-		print(err)
+		return txPickResponse, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		print(err)
+		return txPickResponse, err
 	}
 
 	fmt.Println(string(body)) // will write response in the console
 
-	return body
+	json.Unmarshal(body, &txPickResponse)
+
+	return txPickResponse, nil
 }
 
-func SendTextToAquilaHub(t *TxPickResponseStruct) []uint8 {
-	var configEnv = config.GlobalConfig
+// Send text array to Aquila hub.
+// Response will be an array of vectors.
+func SendTextToAquilaHub(a *AquilaHubRequestStruct, url string) (*AquilaHubResponseStruct, error) {
 
-	createURL := fmt.Sprintf("http://%v:%v/compress",
-		configEnv.AquilaDB.Host,
-		configEnv.AquilaDB.AquilaHubPort,
-	)
-
-	fmt.Println("AquilaHub =====================================")
-	fmt.Println(createURL)
-
-	aquilaHubRequest := &AquilaHubRequestStruct{
-		Data: AquilaDataRequestStruct{
-			Text:         t.Result,
-			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
-		},
-	}
-
-	fmt.Println("Aquila hub request =====================================")
-	fmt.Println(aquilaHubRequest)
-
-	fmt.Println(aquilaHubRequest)
+	var aquilaHubResponse *AquilaHubResponseStruct
 
 	var buf bytes.Buffer
-	err := json.NewEncoder(&buf).Encode(aquilaHubRequest)
+	err := json.NewEncoder(&buf).Encode(a)
 	if err != nil {
-		log.Fatal(err)
+		return aquilaHubResponse, err
 	}
 
-	req, _ := json.Marshal(aquilaHubRequest)
+	req, _ := json.Marshal(a)
 
 	resp, err := http.Post(
-		createURL,
-		// "https://httpbin.org/post",
+		url,
+		// "https://httpbin.org/post", // for debugging
 		"application/json",
 		bytes.NewBuffer(req),
 	)
 	if err != nil {
-		print(err)
+		return aquilaHubResponse, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		print(err)
+		return aquilaHubResponse, err
 	}
 
-	fmt.Println("===============================")
-	fmt.Println(string(body)) // will write response in the console
+	// fmt.Println(string(body)) // will write response in the console
 
-	return body
+	json.Unmarshal(body, &aquilaHubResponse)
+
+	return aquilaHubResponse, nil
 }
 
-func SendVectors(vectors *AquilaHubResponseStruct) []uint8 {
-	var configEnv = config.GlobalConfig
+// Send vectors to Aquila DB
+// Response will be an array of ids
+func SendVectors(docInsert *DocInsertRequestStruct, url string) (*DocInsertResponseStruct, error) {
 
-	createURL := fmt.Sprintf("http://%v:%v/db/doc/insert",
-		configEnv.AquilaDB.Host,
-		configEnv.AquilaDB.AquilaDbPort,
-	)
-
-	docInsert := &DocInsertStruct{
-		Data: DatatDocInsertStruct{
-			Docs: []DocsStruct{
-				{
-					Payload: PayloadStruct{
-						Metadata: MetadataStructDocInsert{
-							Name: "name1",
-							Age:  20,
-						},
-						Code: vectors.Vectors,
-					},
-				},
-			},
-			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
-		},
-		Signature: "secret",
-	}
-
-	fmt.Println(docInsert)
+	var docInsertResponse *DocInsertResponseStruct
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(docInsert)
 	if err != nil {
-		log.Fatal(err)
+		return docInsertResponse, err
 	}
 
-	req, _ := json.Marshal(docInsert)
+	req, err := json.Marshal(docInsert)
+	if err != nil {
+		return docInsertResponse, err
+	}
 
 	resp, err := http.Post(
-		createURL,
-		// "https://httpbin.org/post",
+		url,
+		// "https://httpbin.org/post", // for debugging
 		"application/json",
 		bytes.NewBuffer(req),
 	)
 	if err != nil {
-		print(err)
+		return docInsertResponse, err
 	}
 	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		print(err)
+		return docInsertResponse, err
 	}
 
 	fmt.Println(string(body)) // will write response in the console
+	json.Unmarshal(body, &docInsertResponse)
 
-	return body
-}
-
-func DocInsert(jsonDataBytes []byte) *DocInsertResponseStruct {
-
-	var mercuryResponseStruct *MercuryResponseStruct
-	responseMercury := SendHTMLForParsingToMercury(jsonDataBytes)
-	json.Unmarshal(responseMercury, &mercuryResponseStruct)
-
-	var txPick *TxPickResponseStruct
-	responseTxPick := SendContentToTxPick(mercuryResponseStruct)
-	json.Unmarshal(responseTxPick, &txPick)
-
-	var aquilaHubResponseStruct *AquilaHubResponseStruct
-	responseAquilaHub := SendTextToAquilaHub(txPick)
-	json.Unmarshal(responseAquilaHub, &aquilaHubResponseStruct)
-
-	var docInsertResponse *DocInsertResponseStruct
-	aquilaDbResponse := SendVectors(aquilaHubResponseStruct)
-	json.Unmarshal(aquilaDbResponse, &docInsertResponse)
-
-	return docInsertResponse
-
-	// var configEnv = config.GlobalConfig
-
-	// createURL := fmt.Sprintf("http://%v:%v/db/doc/insert",
-	// 	configEnv.AquilaDB.Host,
-	// 	configEnv.AquilaDB.Port,
-	// )
-
-	// resp, err := http.Post(
-	// 	createURL,
-	// 	// "https://httpbin.org/post",
-	// 	"application/json",
-	// 	bytes.NewBuffer(jsonDataBytes),
-	// )
-	// if err != nil {
-	// 	print(err)
-	// }
-	// defer resp.Body.Close()
-	// body, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	print(err)
-	// }
-
-	// fmt.Println(string(body)) // will write response in the console
-
-	// return body
+	return docInsertResponse, nil
 }

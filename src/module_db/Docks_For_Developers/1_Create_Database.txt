@@ -1,0 +1,69 @@
+#################################################
+1. Create Aquila db:
+#################################################
+-----------------------
+    
+http://localhost:5001/db/create
+
+Request header:
+    Content-Type - application/json
+
+Request body:
+	{
+		"data": {
+			"schema": {
+				"description": "this is my database",
+				"unique": "r8and0mseEd901",
+				"encoder": "strn:msmarco-distilbert-base-tas-b",
+				"codelen": 768,
+				"metadata": {
+					"name": "string",
+					"age": "number"
+				}
+			}
+		},
+		"signature": "secret"
+	}
+
+Response:
+-----------------
+
+{
+    "database_name": "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
+    "success":true
+}
+
+// =========================================================
+
+Example request struct:
+---------------------
+
+createDb := &moduledb.CreateDbRequestStruct{
+    Data: DataStructCreateDb{
+        Schema: SchemaStruct{
+            Description: "this is my database",
+            Unique:      "r8and0mseEd901",
+            Encoder:     "strn:msmarco-distilbert-base-tas-b",
+            Codelen:     768,
+            Metadata: MetadataStructCreateDb{
+                Name: "string",
+                Age:  "number",
+            },
+        },
+    },
+    Signature: "secret",
+}
+
+
+	data, err := json.Marshal(docInsert)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// another way to pass reader to post
+	// reader := bytes.NewReader(data)
+
+// =========================================================
+For debugging post request use this url:
+Post data will send in response
+https://httpbin.org/post

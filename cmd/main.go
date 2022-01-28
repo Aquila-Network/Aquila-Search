@@ -54,7 +54,6 @@ func main() {
 	// remove it
 	aquila := server.Group("/aquila")
 	{
-		aquila.POST("/create_db", controllers.CreateAquilaDB)
 		aquila.POST("/doc_insert", controllers.DocInsert)
 		aquila.POST("/doc_delete", controllers.DocDelete)
 		aquila.GET("/doc_search", controllers.DocSearch)

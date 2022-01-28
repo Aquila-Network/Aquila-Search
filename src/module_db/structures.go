@@ -1,39 +1,15 @@
 package moduledb
 
 // =====================================
-
-// Doc insert struct
-
-type MetadataStructDocInsert struct {
-	Name string `json:"name"`
-	Age  int    `json:"age"`
-}
-
-type PayloadStruct struct {
-	Metadata MetadataStructDocInsert `json:"metadata"`
-	Code     []float32               `json:"code"`
-}
-
-type DocsStruct struct {
-	Payload PayloadStruct `json:"payload"`
-}
-
-type DatatDocInsertStruct struct {
-	Docs         []DocsStruct `json:"docs"`
-	DatabaseName string       `json:"database_name"`
-}
-
-type DocInsertStruct struct {
-	Data      DatatDocInsertStruct `json:"data"`
-	Signature string               `json:"signature"`
-}
-
-type DocInsertResponseStruct struct {
-	Ids     []string `json:"ids"`
-	Success bool     `json:"success"`
-}
-
+// Mercury sturctures
 // =====================================
+
+type MercuryRequestStruct struct {
+	Url  string `json:"url"`
+	Html string `json:"html"`
+}
+
+// -----------------------------
 
 type MercuryDataStruct struct {
 	Title         string `json:"title"`
@@ -57,15 +33,50 @@ type MercuryResponseStruct struct {
 }
 
 // =====================================
+// Doc insert struct
+// =====================================
 
-// Request txpick
+type MetadataStructDocInsert struct {
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
+type PayloadStruct struct {
+	Metadata MetadataStructDocInsert `json:"metadata"`
+	Code     []float64               `json:"code"`
+}
+
+type DocsStruct struct {
+	Payload PayloadStruct `json:"payload"`
+}
+
+type DatatDocInsertStruct struct {
+	Docs         []DocsStruct `json:"docs"`
+	DatabaseName string       `json:"database_name"`
+}
+
+type DocInsertRequestStruct struct {
+	Data      DatatDocInsertStruct `json:"data"`
+	Signature string               `json:"signature"`
+}
+
+// -----------------------
+
+type DocInsertResponseStruct struct {
+	Ids     []string `json:"ids"`
+	Success bool     `json:"success"`
+}
+
+// =====================================
+// TxPick
+// =====================================
 
 type TxPickRequestStruct struct {
 	Url  string `json:"url"`
 	Html string `json:"html"`
 }
 
-// =====================================
+// ---------------------------------
 
 // Response txpick
 
@@ -75,8 +86,8 @@ type TxPickResponseStruct struct {
 }
 
 // =====================================
-
-// Request Aquila Hub
+//  Aquila Hub
+// =====================================
 
 type AquilaDataRequestStruct struct {
 	Text         []string `json:"text"`
@@ -87,16 +98,18 @@ type AquilaHubRequestStruct struct {
 	Data AquilaDataRequestStruct `json:"data"`
 }
 
+// --------------------------------
+
 // Response Aquila Hub
 
 type AquilaHubResponseStruct struct {
-	Vectors []float32
+	Vectors [][]float64
 	Success bool
 }
 
 // =====================================
-
 // Db Search:
+// =====================================
 
 type DataSearchStruct struct {
 	Matrix       [][]float64 `json:"matrix"`
@@ -105,6 +118,25 @@ type DataSearchStruct struct {
 	DatabaseName string      `json:"database_name"`
 }
 
-type SearchAquilaDbStruct struct {
+type SearchAquilaDbRequestStruct struct {
 	Data DataSearchStruct `json:"data"`
+}
+
+// --------------------------------
+
+type MetadataSearchStruct struct {
+	Age  int
+	Name string
+}
+
+type DocSearchData struct {
+	Cid      string
+	Id       int
+	Code     []float64
+	Metadata MetadataSearchStruct
+}
+
+type DocSearchResponseStruct struct {
+	Dist [][]float64
+	Docs [][]DocSearchData
 }

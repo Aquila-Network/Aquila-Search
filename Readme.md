@@ -18,7 +18,7 @@ Then if need change your credentials in .env file. (No need by default)
 $ docker-compose up
 ```
 
-Run migrations from migrations/migration.sql file:
+Run migrations in docker from migrations/migration.sql file:
 ```bash
 $ MIGRATIONS=`cat migrations/migration.sql` && DATABASE_NAME=$(grep DB_NAME .env | cut -d '=' -f 2-) && docker exec -it postgres_db psql "postgresql://$DB_USER:$DB_PASS/${DATABASE_NAME}" --command="$MIGRATIONS"
 ```

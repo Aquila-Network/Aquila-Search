@@ -1,0 +1,45 @@
+#################################################
+#    Delete Aquila db:
+#################################################
+
+delete
+http://localhost:5001/db/doc/delete
+request body:
+{ 
+    "data": {
+        "ids": [
+            "3gwTnetiYJfHTBcqGwoxETLsmmdGYVsd5MRBohuTG22C",
+            "BXsbHy9B3tU9zaHwU41jATzDBisNEFa67XKvYZhB2fzQ"
+        ], 
+        "database_name": "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7"
+    },
+    "signature": "secret"
+}
+
+response:
+{
+    "ids": [
+        "3gwTnetiYJfHTBcqGwoxETLsmmdGYVsd5MRBohuTG22C",
+        "BXsbHy9B3tU9zaHwU41jATzDBisNEFa67XKvYZhB2fzQ"
+    ],
+    "success": true
+}
+
+Request struct:
+--------------------
+
+docDelete := &moduledb.DocDeleteRequestStruct{
+		Data: moduledb.DeleteDataStruct{
+			Ids: []string{
+				"3gwTnetiYJfHTBcqGwoxETLsmmdGYVsd5MRBohuTG22C",
+				"BXsbHy9B3tU9zaHwU41jATzDBisNEFa67XKvYZhB2fzQ",
+			},
+			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
+		},
+		Signature: "secret",
+	}
+
+// =========================================================
+For debugging post request use this url:
+Post data will send in response
+https://httpbin.org/post

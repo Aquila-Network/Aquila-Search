@@ -1,46 +1,13 @@
 package controller
 
 import (
+	"aquiladb/src/config"
 	moduledb "aquiladb/src/module_db"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
-
-type CreateDBResponse struct {
-	DatabaseName string `json:"database_name"`
-	Success      bool   `json:"success"`
-}
-
-type DocInsert struct {
-	Url  string `json:"url"`
-	Html string `json:"html"`
-}
-
-type DocDelete struct {
-	Ids     []string `json:"ids"`
-	Success bool     `json:"success"`
-}
-
-type MetadataSearchStruct struct {
-	Age  int
-	Name string
-}
-
-type DocSearchData struct {
-	Cid      string
-	Id       int
-	Code     []float32
-	Metadata MetadataSearchStruct
-}
-
-type DocSearch struct {
-	Dist [][]float64
-	Docs [][]DocSearchData
-}
 
 type AquilaDBController struct {
 }
@@ -49,63 +16,163 @@ func NewAquilaDBController() *AquilaDBController {
 	return &AquilaDBController{}
 }
 
-// no need of it because aquila will create automatically
-func (a *AquilaDBController) CreateAquilaDB(ctx *gin.Context) {
-	// var createDB *CreateDBResponse
-	// jsonDataBytes, err := ioutil.ReadAll(ctx.Request.Body)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
+// ===================================
 
-	// fmt.Println(jsonDataBytes)
-
-	// response := moduledb.CreateAquilaDatabase(jsonDataBytes)
-	// json.Unmarshal(response, &createDB)
-
-	// ctx.JSON(http.StatusOK, gin.H{
-	// 	"response": &createDB,
-	// })
-}
-
+// /aquila/doc_insert
 func (a *AquilaDBController) DocInsert(ctx *gin.Context) {
 
-	// var docInsert *DocInsert
-	jsonDataBytes, err := ioutil.ReadAll(ctx.Request.Body)
-	if err != nil {
-		fmt.Println(err)
+	// SendHTMLForParsingToMercury
+	var configEnv = config.GlobalConfig // find out about it and remove !!!
+
+	// mercury ===============================================
+	mercuryURL := fmt.Sprintf("http://%v:%v/process",
+		configEnv.AquilaDB.Host,
+		configEnv.AquilaDB.MercuryPort,
+	)
+
+	mercuryRequest := &moduledb.MercuryRequestStruct{
+		Url:  "http://test.com",
+		Html: "<!DOCTYPE html><html><head><title>Bla</title></head><body><h1>Test Aqula DB</h1><p>At the time, no single team member knew Go, but within a month, everyone was writing in Go and we were building out the endpoints. It was the flexibility, how easy it was to use, and the really cool concept behind Go (how Go handles native concurrency, garbage collection, and of course safety+speed.) that helped engage us during the build. Also, who can beat that cute mascot!</p></body></html>",
 	}
 
-	response := moduledb.DocInsert(jsonDataBytes)
-	// json.Unmarshal(response, &docInsert)
+	mercuryResponse, _ := moduledb.SendHTMLForParsingToMercury(mercuryRequest, mercuryURL)
+
+	// TxPick ===============================================
+	txPicRequest := &moduledb.TxPickRequestStruct{
+		Url:  mercuryResponse.Data.Url,
+		Html: mercuryResponse.Data.Content,
+	}
+
+	txPickURL := fmt.Sprintf("http://%v:%v/process",
+		configEnv.AquilaDB.Host,
+		configEnv.AquilaDB.TxPickPort,
+	)
+
+	txPickResponse, _ := moduledb.SendContentToTxPick(txPicRequest, txPickURL)
+
+	// Aquila Hub ===============================================
+	aquilaHubUrl := fmt.Sprintf("http://%v:%v/compress",
+		configEnv.AquilaDB.Host,
+		configEnv.AquilaDB.AquilaHubPort,
+	)
+
+	aquilaHubRequest := &moduledb.AquilaHubRequestStruct{
+		Data: moduledb.AquilaDataRequestStruct{
+			Text:         txPickResponse.Result,
+			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
+		},
+	}
+
+	aquilaHubResponse, _ := moduledb.SendTextToAquilaHub(aquilaHubRequest, aquilaHubUrl)
+
+	// Aquila Hub ===============================================
+	docInsertURL := fmt.Sprintf("http://%v:%v/db/doc/insert",
+		configEnv.AquilaDB.Host,
+		configEnv.AquilaDB.AquilaDbPort,
+	)
+
+	fmt.Println(docInsertURL)
+
+	docInsert := &moduledb.DocInsertRequestStruct{
+		Data: moduledb.DatatDocInsertStruct{
+			Docs: []moduledb.DocsStruct{
+				{
+					Payload: moduledb.PayloadStruct{
+						Metadata: moduledb.MetadataStructDocInsert{
+							Name: "name1",
+							Age:  20,
+						},
+						Code: aquilaHubResponse.Vectors[0], // ????
+					},
+				},
+				{
+					Payload: moduledb.PayloadStruct{
+						Metadata: moduledb.MetadataStructDocInsert{
+							Name: "name1",
+							Age:  20,
+						},
+						Code: []float64{0.1, 0.2, 0.3},
+					},
+				},
+			},
+			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
+		},
+		Signature: "secret",
+	}
+
+	docInsertResponse, _ := moduledb.SendVectors(docInsert, docInsertURL)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"response": docInsertResponse,
+	})
+}
+
+// Doc Delete
+func (a *AquilaDBController) DocDelete(ctx *gin.Context) {
+
+	var configEnv = config.GlobalConfig
+
+	url := fmt.Sprintf("http://%v:%v/db/doc/delete",
+		configEnv.AquilaDB.Host,
+		configEnv.AquilaDB.AquilaDbPort,
+	)
+
+	docDelete := &moduledb.DocDeleteRequestStruct{
+		Data: moduledb.DeleteDataStruct{
+			Ids: []string{
+				"3gwTnetiYJfHTBcqGwoxETLsmmdGYVsd5MRBohuTG22C",
+				"BXsbHy9B3tU9zaHwU41jATzDBisNEFa67XKvYZhB2fzQ",
+			},
+			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
+		},
+		Signature: "secret",
+	}
+
+	responseDelete, err := moduledb.DocDelete(docDelete, url)
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message":  "Delete Document",
+		"response": &responseDelete,
+	})
+}
+
+// Dock search
+func (a *AquilaDBController) DocSearch(ctx *gin.Context) {
+
+	var configEnv = config.GlobalConfig
+
+	url := fmt.Sprintf("http://%v:%v/db/search",
+		configEnv.AquilaDB.Host,
+		configEnv.AquilaDB.AquilaDbPort,
+	)
+
+	// pattern
+	// https://www.geeksforgeeks.org/slice-of-slices-in-golang/
+	matrix := make([][]float64, 1)
+	matrix[0] = make([]float64, 1)
+	matrix[0] = []float64{
+		-0.01806008443236351, -0.17380790412425995, 0.03992759436368942, 0.43514639139175415,
+	}
+	searchBody := &moduledb.SearchAquilaDbRequestStruct{
+		Data: moduledb.DataSearchStruct{
+			Matrix:       matrix,
+			K:            10,
+			R:            0,
+			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
+		},
+	}
+
+	response, err := moduledb.Search(searchBody, url)
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"response": response,
-	})
-}
-
-func (a *AquilaDBController) DocDelete(ctx *gin.Context) {
-
-	var docDelete *DocDelete
-	// jsonDataBytes, err := ioutil.ReadAll(ctx.Request.Body)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	response := moduledb.DocDelete()
-	json.Unmarshal(response, &docDelete)
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"message":  "bla",
-		"response": &docDelete,
-	})
-}
-
-func (a *AquilaDBController) DocSearch(ctx *gin.Context) {
-	// var docSearch *DocSearch
-
-	moduledb.Search()
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Look to the console.",
-		// "response": &docDelete,
 	})
 }

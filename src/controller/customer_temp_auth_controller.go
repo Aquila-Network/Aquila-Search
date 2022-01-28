@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"aquiladb/src/config"
 	"aquiladb/src/model"
 	moduledb "aquiladb/src/module_db"
 	"aquiladb/src/service"
@@ -42,7 +43,7 @@ func (c CustomerTempAuthController) CreateTempCustomer(ctx *gin.Context) {
 	customer.LastName = strings.Title(randomNoun)
 	customer.SecretKey = service.KeyGenerate(14)
 
-	createAquilaDb := &moduledb.CreateDbStruct{
+	createAquilaDb := &moduledb.CreateDbRequestStruct{
 		Data: moduledb.DataStructCreateDb{
 			Schema: moduledb.SchemaStruct{
 				Description: fmt.Sprintf("Database of %v %v", customer.FirstName, customer.LastName),
@@ -58,8 +59,19 @@ func (c CustomerTempAuthController) CreateTempCustomer(ctx *gin.Context) {
 		Signature: "secret",
 	}
 
+	// create url for aquila db
+	var configEnv = config.GlobalConfig
+	createURL := fmt.Sprintf("http://%v:%v/db/create",
+		configEnv.AquilaDB.Host,
+		configEnv.AquilaDB.AquilaDbPort,
+	)
+
 	// create aquila database
-	responseAquilaDb := moduledb.CreateAquilaDatabase(createAquilaDb)
+	responseAquilaDb, errResponseAquila := moduledb.CreateAquilaDatabase(createAquilaDb, createURL)
+	if errResponseAquila != nil {
+		NewErrorResponse(ctx, http.StatusBadGateway, errResponseAquila.Error())
+		return
+	}
 
 	customer.AquilaDb = responseAquilaDb.DatabaseName
 

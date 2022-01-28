@@ -1,7 +1,6 @@
 package moduledb
 
 import (
-	"aquiladb/src/config"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -9,7 +8,7 @@ import (
 	"net/http"
 )
 
-type ResponseAquilaDbStruct struct {
+type CreateAquilaResponsStruct struct {
 	DatabaseName string `json:"database_name"`
 	Success      bool   `json:"success"`
 }
@@ -31,39 +30,33 @@ type DataStructCreateDb struct {
 	Schema SchemaStruct `json:"schema"`
 }
 
-type CreateDbStruct struct {
+type CreateDbRequestStruct struct {
 	Data      DataStructCreateDb `json:"data"`
 	Signature string             `json:"signature"`
 }
 
-func CreateAquilaDatabase(createDb *CreateDbStruct) *ResponseAquilaDbStruct {
+func CreateAquilaDatabase(createDb *CreateDbRequestStruct, url string) (*CreateAquilaResponsStruct, error) {
 
+	var responseAquilaDb *CreateAquilaResponsStruct
 	data, err := json.Marshal(createDb)
-	var configEnv = config.GlobalConfig
-
-	createURL := fmt.Sprintf("http://%v:%v/db/create",
-		configEnv.AquilaDB.Host,
-		configEnv.AquilaDB.AquilaDbPort,
-	)
 
 	resp, err := http.Post(
-		createURL,
+		url,
 		"application/json",
 		bytes.NewBuffer(data),
 	)
 	if err != nil {
-		print(err)
+		return responseAquilaDb, err
 	}
+
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		print(err)
+		return responseAquilaDb, err
 	}
 
-	var responseAquilaDb *ResponseAquilaDbStruct
 	json.Unmarshal(body, &responseAquilaDb)
-
 	fmt.Println(string(body)) // write response in the console
 
-	return responseAquilaDb
+	return responseAquilaDb, nil
 }
