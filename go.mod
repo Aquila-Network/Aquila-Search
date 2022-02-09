@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/Aquila-Network/go-aquila v0.0.0-20220209053442-8ae855883107 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect

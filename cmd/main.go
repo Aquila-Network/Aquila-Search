@@ -40,7 +40,7 @@ func main() {
 	services := service.NewService(repos)
 	controllers := controller.NewController(services)
 
-	SetupLogOutput()
+	// SetupLogOutput() // not working without docker
 	server := gin.Default()
 	// server.Use(gin.Recovery(), gin.Logger())
 
@@ -59,6 +59,7 @@ func main() {
 		aquila.GET("/doc_search", controllers.DocSearch)
 	}
 
+	// not need
 	// auth := server.Group("/auth")
 	// {
 	// 	auth.POST("/register", controllers.Register)
