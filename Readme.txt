@@ -11,11 +11,12 @@ Install dependencies:
     $ go get -u github.com/golang-jwt/jwt
     $ go get -u github.com/swaggo/swag/cmd/swag
 
+    $ go get github.com/Aquila-Network/go-aquila   ---> aquila go library
+
 // ======================================
 
 Run app:
     $ go run cmd/main.go
-
 
 Run with live reload:
     Install air:

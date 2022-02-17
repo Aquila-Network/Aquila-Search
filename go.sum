@@ -1,5 +1,7 @@
 github.com/Aquila-Network/go-aquila v0.0.0-20220209053442-8ae855883107 h1:2+qZf1+OioOT0MKgMJuds2tfvt4cPzim5t6lq6yYn9E=
 github.com/Aquila-Network/go-aquila v0.0.0-20220209053442-8ae855883107/go.mod h1:rEbbkSTbxzIkp9sFt9MvRFyRzFe2GBxmbQy1in3MnZ4=
+github.com/Aquila-Network/go-aquila v0.0.0-20220211201407-409f358edcb8 h1:upVg6WdL58iya0DWlrlvA67U1fmBEVNGD2/uLBxys/Y=
+github.com/Aquila-Network/go-aquila v0.0.0-20220211201407-409f358edcb8/go.mod h1:khsf2bPz1alM/8QhbFSbmblD93DZwRurBsX7JXbZkLo=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
