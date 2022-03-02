@@ -2,10 +2,7 @@ import logging
 
 from flask import Flask, request
 from flask_cors import CORS
-from flask import jsonify
 from functools import wraps
-
-import html_cleanup as chtml
 import hub_proxy as hub
 
 from services import logging as slog
@@ -15,7 +12,6 @@ import math
 import numpy as np
 
 from aquilapy import Wallet, DB
-from bs4 import BeautifulSoup
 
 from transformers import pipeline
 summarizer = None # pipeline("summarization")
@@ -38,6 +34,10 @@ db = DB("http://aquiladb", "5001", wallet)
 
 # Connect to Aquila Hub instance
 # hub = Hub("http://aquilahub", "5002", wallet)
+
+# Create indexer instance with routine thread
+from indexer import Indexer
+web_indexer = Indexer(db, hub)
 
 def create_database (user_id):
 
@@ -62,34 +62,6 @@ def create_database (user_id):
 
     return db_name, True
 
-# Compress data
-def compress_strings (db_name, strings_in):
-    return hub.compress_documents(db_name, strings_in)
-
-# Insert docs
-def index_website (db_name, paragraphs, title, url):
-    # add title as well
-    if title != "":
-        paragraphs.append(title)
-    compressed = compress_strings(db_name, paragraphs)
-    docs = []
-    for idx_, para in enumerate(paragraphs):
-        v = compressed[idx_]
-
-        docs.append({
-            "metadata": {
-                "url": url, 
-                "text": para
-            },
-            "code": v # np.true_divide(v, np.linalg.norm(v)).tolist()
-        })
-    try:
-        dids = db.insert_documents(db_name, docs)
-        return True
-    except Exception as e:
-        logging.debug(e)
-        return False
-
 # generate summary
 def summarize(text):
     if not summarizer:
@@ -104,7 +76,7 @@ def QAgen(query, context):
 
 # Search docs
 def search_docs(db_name, query):
-    compressed = compress_strings(db_name, [query])
+    compressed = hub.compress_documents(db_name, [query])
     docs, dists = db.search_k_documents(db_name, compressed, 100)
     index = {}
     score = {}
@@ -136,25 +108,6 @@ def search_docs(db_name, query):
     results_d = {k: v for k, v in sorted(results_d.items(), key=lambda item: item[1], reverse=True)}
 
     return results_d
-    
-    # threshold = -1
-    # for key in results_d:
-        # print(key, results_d[key])
-    #     if threshold == -1:
-    #         threshold = round(results_d[key]*0.1)
-    #     if results_d[key] > threshold:
-    #         print(key)
-
-# Get paragraphs given html document
-# def get_paragraphs(html_doc):
-#     soup = BeautifulSoup(html_doc, 'html.parser')
-#     paras = []
-#     for para in soup.find_all("p"):
-#         text_data = para.text
-#         for txt in text_data.split("\n"):
-#             if txt.strip() != "":
-#                 paras.append(" ".join(txt.strip().split()))
-#     return paras
 
 # Add authentication
 def authenticate ():
@@ -247,12 +200,8 @@ def index_page ():
                 "message": "Invalid parameters"
             }, 400
 
-    # cleanup html
-    chtml_data = chtml.process_html(html_data, url)
-    thtml_data = chtml.trim_content(chtml_data["data"]["content"])["result"]
-
-    # index html
-    status = index_website(db_name, thtml_data, chtml_data["data"]["title"], url)
+    # index a page
+    status, chtml_data = web_indexer.index(html_data, url, db_name)
 
     # Build response
     if status:
@@ -261,7 +210,7 @@ def index_page ():
             # index activity logging
             slog.put_log_index(slogging_session, db_name, url, html_data, 0)
             # metadata logging
-            slog.put_url_summary(slogging_session, db_name, url, chtml_data["data"]["title"], chtml_data["data"]["author"], chtml_data["data"]["lead_image_url"], chtml_data["data"]["next_page_url"], "...".join(thtml_data))
+            slog.put_url_summary(slogging_session, db_name, url, chtml_data["data"]["title"], chtml_data["data"]["author"], chtml_data["data"]["lead_image_url"], chtml_data["data"]["next_page_url"], chtml_data["data"]["excerpt"])
         return {
                 "success": True,
                 "databaseName": db_name
@@ -366,7 +315,7 @@ def correct ():
         slog.put_log_correct(slogging_session, db_name, query, url)
 
     # index correction
-    status = index_website(db_name, [], query, url)
+    status = web_indexer.index_website(db_name, [], query, url)
 
     # Build response
     return {
