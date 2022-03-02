@@ -27,36 +27,34 @@ class Indexer ():
     # index webpage parent
     def index (self, html_data, url, db_name):
         # fetch metadata
-        # page_metadata = metadata_parser.MetadataParser(html=html_data)
-        chtml_data = chtml.process_html(html_data, url)
-
-        # # fill in metadata object to reflect mercury's response
-        # chtml_data = {"data": {}}
-        # # title
-        # if page_metadata.get_metadatas('title') != None:
-        #     chtml_data["data"]["title"] = page_metadata.get_metadatas('title')[0]
-        # else:
-        #     chtml_data["data"]["title"] = url
-        # # author
-        # if page_metadata.get_metadatas('author') != None:
-        #     chtml_data["data"]["author"] = page_metadata.get_metadatas('author')[0]
-        # else:
-        #     chtml_data["data"]["author"] = None
-        # # cover image
-        # if page_metadata.get_metadatas('image') != None:
-        #     chtml_data["data"]["lead_image_url"] = page_metadata.get_metadatas('image')[0]
-        # else:
-        #     chtml_data["data"]["lead_image_url"] = None
-        # # summary
-        # if page_metadata.get_metadatas('description') != None:
-        #     chtml_data["data"]["excerpt"] = page_metadata.get_metadatas('description')[0]
-        # else:
-        #     chtml_data["data"]["excerpt"] = ""
-        # # next page
-        # chtml_data["data"]["next_page_url"] = None
+        page_metadata = metadata_parser.MetadataParser(html=html_data)
+        # fill in metadata object to reflect mercury's response
+        chtml_data = {"data": {}}
+        # title
+        if page_metadata.get_metadatas('title') != None:
+            chtml_data["data"]["title"] = page_metadata.get_metadatas('title')[0]
+        else:
+            chtml_data["data"]["title"] = url
+        # author
+        if page_metadata.get_metadatas('author') != None:
+            chtml_data["data"]["author"] = page_metadata.get_metadatas('author')[0]
+        else:
+            chtml_data["data"]["author"] = None
+        # cover image
+        if page_metadata.get_metadatas('image') != None:
+            chtml_data["data"]["lead_image_url"] = page_metadata.get_metadatas('image')[0]
+        else:
+            chtml_data["data"]["lead_image_url"] = None
+        # summary
+        if page_metadata.get_metadatas('description') != None:
+            chtml_data["data"]["excerpt"] = page_metadata.get_metadatas('description')[0]
+        else:
+            chtml_data["data"]["excerpt"] = ""
+        # next page
+        chtml_data["data"]["next_page_url"] = None
 
         # add to index html queue
-        self.pipeline.put({"db_name":db_name, "chtml_data": chtml_data, "url":url})
+        self.pipeline.put({"db_name":db_name, "html_data": html_data, "url":url})
 
         return True, chtml_data
 
@@ -102,9 +100,9 @@ class Indexer ():
             # check if queue is not empty
             if self.pipeline.qsize() > 0:
                 qitem = self.pipeline.get()
-                chtml_data = qitem["chtml_data"]
 
-                # fetch paragraphs from HTML
+                # cleanup html
+                chtml_data = chtml.process_html(qitem["html_data"], qitem["url"])
                 thtml_data = chtml.trim_content(chtml_data["data"]["content"])["result"]
                 
                 status = self.index_website (qitem["db_name"], thtml_data, chtml_data["data"]["title"], qitem["url"])
