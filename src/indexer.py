@@ -27,7 +27,7 @@ class Indexer ():
     # index webpage parent
     def index (self, html_data, url, db_name):
         # fetch metadata
-        page_metadata = metadata_parser.MetadataParser(html=html_data)
+        page_metadata = metadata_parser.MetadataParser(html=html_data, search_head_only=True)
         # fill in metadata object to reflect mercury's response
         chtml_data = {"data": {}}
         # title
