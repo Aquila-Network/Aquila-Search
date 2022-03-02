@@ -29,7 +29,7 @@ class Indexer ():
         thtml_data = chtml.trim_content(chtml_data["data"]["content"])["result"]
 
         # add to index html queue
-        self.pipeline.put({"db_name":db_name, "thtml_data": thtml_data, "title": chtml_data["data"]["title"], "url":url})
+        self.pipeline.put({"db_name":db_name, "paragraphs": thtml_data, "title": chtml_data["data"]["title"], "url":url})
 
         return True, chtml_data
 

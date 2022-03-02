@@ -201,7 +201,9 @@ def index_page ():
             }, 400
 
     # index a page
+    logging.debug("adding website to queue")
     status, chtml_data = web_indexer.index(html_data, url, db_name)
+    logging.debug("added website to queue")
 
     # Build response
     if status:
@@ -211,6 +213,7 @@ def index_page ():
             slog.put_log_index(slogging_session, db_name, url, html_data, 0)
             # metadata logging
             slog.put_url_summary(slogging_session, db_name, url, chtml_data["data"]["title"], chtml_data["data"]["author"], chtml_data["data"]["lead_image_url"], chtml_data["data"]["next_page_url"], chtml_data["data"]["excerpt"])
+            logging.debug("indexing done")
         return {
                 "success": True,
                 "databaseName": db_name
