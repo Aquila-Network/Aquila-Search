@@ -2,10 +2,13 @@ package controller
 
 import (
 	"aquiladb/src/config"
-	moduledb "aquiladb/src/module_db"
+	localmoduledb "aquiladb/src/module_db"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
+	moduleDb "github.com/Aquila-Network/go-aquila"
+	moduleDbSrc "github.com/Aquila-Network/go-aquila/src"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,20 +28,22 @@ func (a *AquilaDBController) DocInsert(ctx *gin.Context) {
 	var configEnv = config.GlobalConfig // find out about it and remove !!!
 
 	// mercury ===============================================
+	// localhost:5009/process
 	mercuryURL := fmt.Sprintf("http://%v:%v/process",
 		configEnv.AquilaDB.Host,
 		configEnv.AquilaDB.MercuryPort,
 	)
 
-	mercuryRequest := &moduledb.MercuryRequestStruct{
+	mercuryRequest := &localmoduledb.MercuryRequestStruct{
 		Url:  "http://test.com",
 		Html: "<!DOCTYPE html><html><head><title>Bla</title></head><body><h1>Test Aqula DB</h1><p>At the time, no single team member knew Go, but within a month, everyone was writing in Go and we were building out the endpoints. It was the flexibility, how easy it was to use, and the really cool concept behind Go (how Go handles native concurrency, garbage collection, and of course safety+speed.) that helped engage us during the build. Also, who can beat that cute mascot!</p></body></html>",
 	}
 
-	mercuryResponse, _ := moduledb.SendHTMLForParsingToMercury(mercuryRequest, mercuryURL)
+	mercuryResponse, _ := localmoduledb.SendHTMLForParsingToMercury(mercuryRequest, mercuryURL)
 
 	// TxPick ===============================================
-	txPicRequest := &moduledb.TxPickRequestStruct{
+	// localhost:5008/process
+	txPicRequest := &localmoduledb.TxPickRequestStruct{
 		Url:  mercuryResponse.Data.Url,
 		Html: mercuryResponse.Data.Content,
 	}
@@ -48,59 +53,74 @@ func (a *AquilaDBController) DocInsert(ctx *gin.Context) {
 		configEnv.AquilaDB.TxPickPort,
 	)
 
-	txPickResponse, _ := moduledb.SendContentToTxPick(txPicRequest, txPickURL)
+	txPickResponse, _ := localmoduledb.SendContentToTxPick(txPicRequest, txPickURL)
 
 	// Aquila Hub ===============================================
+	// localhost:5002/compress
 	aquilaHubUrl := fmt.Sprintf("http://%v:%v/compress",
 		configEnv.AquilaDB.Host,
 		configEnv.AquilaDB.AquilaHubPort,
 	)
 
-	aquilaHubRequest := &moduledb.AquilaHubRequestStruct{
-		Data: moduledb.AquilaDataRequestStruct{
+	aquilaHubRequest := &localmoduledb.AquilaHubRequestStruct{
+		Data: localmoduledb.AquilaDataRequestStruct{
 			Text:         txPickResponse.Result,
 			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
 		},
 	}
 
-	aquilaHubResponse, _ := moduledb.SendTextToAquilaHub(aquilaHubRequest, aquilaHubUrl)
+	aquilaHubResponse, _ := localmoduledb.SendTextToAquilaHub(aquilaHubRequest, aquilaHubUrl)
 
-	// Aquila Hub ===============================================
+	// ===============================================
+	// module
+	// ===============================================
+	// localhost:5001/db/doc/insert
 	docInsertURL := fmt.Sprintf("http://%v:%v/db/doc/insert",
 		configEnv.AquilaDB.Host,
 		configEnv.AquilaDB.AquilaDbPort,
 	)
 
-	fmt.Println(docInsertURL)
-
-	docInsert := &moduledb.DocInsertRequestStruct{
-		Data: moduledb.DatatDocInsertStruct{
-			Docs: []moduledb.DocsStruct{
-				{
-					Payload: moduledb.PayloadStruct{
-						Metadata: moduledb.MetadataStructDocInsert{
-							Name: "name1",
-							Age:  20,
-						},
-						Code: aquilaHubResponse.Vectors[0], // ????
+	docInsert := &moduleDbSrc.DatatDocInsertStruct{
+		Docs: []moduleDbSrc.DocsStruct{
+			{
+				Payload: moduleDbSrc.PayloadStruct{
+					Metadata: moduleDbSrc.MetadataStructDocInsert{
+						Name: "name1",
+						Age:  20,
 					},
-				},
-				{
-					Payload: moduledb.PayloadStruct{
-						Metadata: moduledb.MetadataStructDocInsert{
-							Name: "name1",
-							Age:  20,
-						},
-						Code: []float64{0.1, 0.2, 0.3},
-					},
+					Code: aquilaHubResponse.Vectors[0], // ????
 				},
 			},
-			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
+			{
+				Payload: moduleDbSrc.PayloadStruct{
+					Metadata: moduleDbSrc.MetadataStructDocInsert{
+						Name: "name1",
+						Age:  20,
+					},
+					Code: []float64{0.1, 0.2, 0.3},
+				},
+			},
 		},
-		Signature: "secret",
+		DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
 	}
 
-	docInsertResponse, _ := moduledb.SendVectors(docInsert, docInsertURL)
+	// init wallet with private key
+	priv, err := ioutil.ReadFile("/home/dev/aquilax/ossl/private_unencrypted.pem")
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+	}
+	walletInitStruct := moduleDbSrc.NewWallet(string(priv[:]))
+	walletSign, err := walletInitStruct.CreateSignatureWallet(docInsert)
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+	}
+	walletInitStruct.SecretKey = walletSign
+
+	// create database
+	docInsertResponse, err := moduleDb.AquilaModule(walletInitStruct).AquilaDbInterface.InsertDocument(docInsert, docInsertURL)
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusBadGateway, err.Error())
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"response": docInsertResponse,
@@ -117,18 +137,27 @@ func (a *AquilaDBController) DocDelete(ctx *gin.Context) {
 		configEnv.AquilaDB.AquilaDbPort,
 	)
 
-	docDelete := &moduledb.DocDeleteRequestStruct{
-		Data: moduledb.DeleteDataStruct{
-			Ids: []string{
-				"3gwTnetiYJfHTBcqGwoxETLsmmdGYVsd5MRBohuTG22C",
-				"BXsbHy9B3tU9zaHwU41jATzDBisNEFa67XKvYZhB2fzQ",
-			},
-			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
+	docDelete := &moduleDbSrc.DeleteDataStruct{
+		Ids: []string{
+			"3gwTnetiYJfHTBcqGwoxETLsmmdGYVsd5MRBohuTG22C",
+			"BXsbHy9B3tU9zaHwU41jATzDBisNEFa67XKvYZhB2fzQ",
 		},
-		Signature: "secret",
+		DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
 	}
 
-	responseDelete, err := moduledb.DocDelete(docDelete, url)
+	// init wallet with private key
+	priv, err := ioutil.ReadFile("/home/dev/aquilax/ossl/private_unencrypted.pem")
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+	}
+	walletInitStruct := moduleDbSrc.NewWallet(string(priv[:]))
+	walletSign, err := walletInitStruct.CreateSignatureWallet(docDelete)
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+	}
+	walletInitStruct.SecretKey = walletSign
+
+	responseDelete, err := moduleDb.AquilaModule(walletInitStruct).AquilaDbInterface.DeleteDocument(docDelete, url)
 	if err != nil {
 		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
 		return
@@ -157,16 +186,27 @@ func (a *AquilaDBController) DocSearch(ctx *gin.Context) {
 	matrix[0] = []float64{
 		-0.01806008443236351, -0.17380790412425995, 0.03992759436368942, 0.43514639139175415,
 	}
-	searchBody := &moduledb.SearchAquilaDbRequestStruct{
-		Data: moduledb.DataSearchStruct{
-			Matrix:       matrix,
-			K:            10,
-			R:            0,
-			DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
-		},
+	searchBody := &moduleDbSrc.DataSearchStruct{
+		Matrix:       matrix,
+		K:            10,
+		R:            0,
+		DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
 	}
 
-	response, err := moduledb.Search(searchBody, url)
+	// init wallet with private key
+	priv, err := ioutil.ReadFile("/home/dev/aquilax/ossl/private_unencrypted.pem")
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+	}
+	walletInitStruct := moduleDbSrc.NewWallet(string(priv[:]))
+	walletSign, err := walletInitStruct.CreateSignatureWallet(searchBody)
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+	}
+	walletInitStruct.SecretKey = walletSign
+
+	// wallet, err := moduleDbSrc.CreateSignatureWallet(searchBody)
+	response, err := moduleDb.AquilaModule(walletInitStruct).AquilaDbInterface.SearchKDocument(searchBody, url)
 	if err != nil {
 		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
 		return

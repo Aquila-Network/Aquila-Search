@@ -20,7 +20,8 @@ Get body:
         "k": 10,
         "R": 0,
         "database_name": "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7"
-    }
+    },
+	"signature": "secret"
 }
 
 Example request struct:

@@ -11,18 +11,7 @@ with open(key_file, "r") as pkf:
     k = pkf.read()
     priv_key = RSA.import_key(k)
 
-data_ = {
-            "schema": {
-                "description": "this is my database",
-                "unique": "r8and0mseEd901",
-                "encoder": "strn:msmarco-distilbert-base-tas-b",
-                "codelen": 768,
-                "metadata": {
-                    "name": "string",
-                    "age": "number"
-                }
-            }
-        }
+data_ = {"matrix":[[-0.01806008443236351,-0.17380790412425995,0.03992759436368942,0.43514639139175415]],"k":10,"r":0,"database_name":"BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7"}
 
 data_bson = bson.dumps(data_)
 
@@ -35,12 +24,12 @@ signer = pkcs1_15.new(priv_key)
 signature = signer.sign(hash)
 signature = base58.b58encode(signature).decode("utf-8")
 
-print(data_bson)
+print(data_bson.hex()) # print in hexidecimal
 print("")
 print(signature)
 
 # run 
-# $ python3 python_json_to_bson.py
+# $ python3 python_wallet.py
 #
 # install tool
 # $ sudo apt install python3-pip

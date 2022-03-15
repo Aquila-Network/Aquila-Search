@@ -3,13 +3,15 @@ package controller
 import (
 	"aquiladb/src/config"
 	"aquiladb/src/model"
-	moduledb "aquiladb/src/module_db"
 	"aquiladb/src/service"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"strings"
 
+	moduleDb "github.com/Aquila-Network/go-aquila"
+	moduleDbSrc "github.com/Aquila-Network/go-aquila/src"
 	"github.com/gin-gonic/gin"
 )
 
@@ -43,20 +45,17 @@ func (c CustomerTempAuthController) CreateTempCustomer(ctx *gin.Context) {
 	customer.LastName = strings.Title(randomNoun)
 	customer.SecretKey = service.KeyGenerate(14)
 
-	createAquilaDb := &moduledb.CreateDbRequestStruct{
-		Data: moduledb.DataStructCreateDb{
-			Schema: moduledb.SchemaStruct{
-				Description: fmt.Sprintf("Database of %v %v", customer.FirstName, customer.LastName),
-				Unique:      customer.SecretKey,
-				Encoder:     "strn:msmarco-distilbert-base-tas-b",
-				Codelen:     768,
-				Metadata: moduledb.MetadataStructCreateDb{
-					Name: "string",
-					Age:  "number",
-				},
+	createAquilaDb := &moduleDbSrc.DataStructCreateDb{
+		Schema: moduleDbSrc.SchemaStruct{
+			Description: fmt.Sprintf("Database of %v %v", customer.FirstName, customer.LastName),
+			Unique:      customer.SecretKey,
+			Encoder:     "strn:msmarco-distilbert-base-tas-b",
+			Codelen:     768,
+			Metadata: moduleDbSrc.MetadataStructCreateDb{
+				Name: "string",
+				Age:  "number",
 			},
 		},
-		Signature: "secret",
 	}
 
 	// create url for aquila db
@@ -66,8 +65,20 @@ func (c CustomerTempAuthController) CreateTempCustomer(ctx *gin.Context) {
 		configEnv.AquilaDB.AquilaDbPort,
 	)
 
+	// init wallet with private key
+	priv, err := ioutil.ReadFile("/home/dev/aquilax/ossl/private_unencrypted.pem")
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+	}
+	walletInitStruct := moduleDbSrc.NewWallet(string(priv[:]))
+	walletSign, err := walletInitStruct.CreateSignatureWallet(createAquilaDb)
+	if err != nil {
+		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+	}
+	walletInitStruct.SecretKey = walletSign
+
 	// create aquila database
-	responseAquilaDb, errResponseAquila := moduledb.CreateAquilaDatabase(createAquilaDb, createURL)
+	responseAquilaDb, errResponseAquila := moduleDb.AquilaModule(walletInitStruct).AquilaDbInterface.CreateDatabase(createAquilaDb, createURL)
 	if errResponseAquila != nil {
 		NewErrorResponse(ctx, http.StatusBadGateway, errResponseAquila.Error())
 		return
@@ -76,8 +87,8 @@ func (c CustomerTempAuthController) CreateTempCustomer(ctx *gin.Context) {
 	customer.AquilaDb = responseAquilaDb.DatabaseName
 
 	// get newest temporary created customer
-	customer, err := c.service.CreateTempCustomer(customer)
-	if err != nil {
+	customer, errCreate := c.service.CreateTempCustomer(customer)
+	if errCreate != nil {
 		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
 		return
 	}

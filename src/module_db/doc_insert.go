@@ -37,7 +37,7 @@ func SendHTMLForParsingToMercury(mercuryRequest *MercuryRequestStruct, url strin
 		return mercuryResponse, err
 	}
 
-	fmt.Println(string(body)) // will write response in the console
+	// fmt.Println(string(body)) // will write response in the console
 
 	// unmarshal response and return struct
 	json.Unmarshal(body, &mercuryResponse)
@@ -77,7 +77,7 @@ func SendContentToTxPick(txPickRequest *TxPickRequestStruct, url string) (*TxPic
 		return txPickResponse, err
 	}
 
-	fmt.Println(string(body)) // will write response in the console
+	// fmt.Println(string(body)) // will write response in the console
 
 	json.Unmarshal(body, &txPickResponse)
 
