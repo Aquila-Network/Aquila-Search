@@ -36,6 +36,9 @@ type ConfigEnv struct {
 		TxPickPort    string `env:"AQUILA_TXTPICK_PORT"`
 		AquilaHubPort string `env:"AQUILA_HUB_PORT"`
 	}
+	PrivateUnencryptedPemFileStruct struct {
+		PathToPrivateUnencryptedPemFile string `env:"PATH_TO_PRIVATE_UNENCRYPTED_PEM_FILE"`
+	}
 }
 
 func InitEnvConfig() *ConfigEnv {

@@ -1,11 +1,9 @@
 package controller
 
 import (
-	"aquiladb/src/config"
 	"aquiladb/src/model"
 	"aquiladb/src/service"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -59,23 +57,16 @@ func (c CustomerTempAuthController) CreateTempCustomer(ctx *gin.Context) {
 	}
 
 	// create url for aquila db
-	var configEnv = config.GlobalConfig
 	createURL := fmt.Sprintf("http://%v:%v/db/create",
 		configEnv.AquilaDB.Host,
 		configEnv.AquilaDB.AquilaDbPort,
 	)
 
-	// init wallet with private key
-	priv, err := ioutil.ReadFile("/home/dev/aquilax/ossl/private_unencrypted.pem")
+	walletInitStruct, err := CreateWalletSign(createAquilaDb)
 	if err != nil {
 		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
 	}
-	walletInitStruct := moduleDbSrc.NewWallet(string(priv[:]))
-	walletSign, err := walletInitStruct.CreateSignatureWallet(createAquilaDb)
-	if err != nil {
-		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
-	}
-	walletInitStruct.SecretKey = walletSign
 
 	// create aquila database
 	responseAquilaDb, errResponseAquila := moduleDb.AquilaModule(walletInitStruct).AquilaDbInterface.CreateDatabase(createAquilaDb, createURL)

@@ -12,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var configEnv = config.GlobalConfig
+
 type AquilaDBController struct {
 }
 
@@ -25,8 +27,6 @@ func NewAquilaDBController() *AquilaDBController {
 func (a *AquilaDBController) DocInsert(ctx *gin.Context) {
 
 	// SendHTMLForParsingToMercury
-	var configEnv = config.GlobalConfig // find out about it and remove !!!
-
 	// mercury ===============================================
 	// localhost:5009/process
 	mercuryURL := fmt.Sprintf("http://%v:%v/process",
@@ -104,17 +104,11 @@ func (a *AquilaDBController) DocInsert(ctx *gin.Context) {
 		DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
 	}
 
-	// init wallet with private key
-	priv, err := ioutil.ReadFile("/home/dev/aquilax/ossl/private_unencrypted.pem")
+	walletInitStruct, err := CreateWalletSign(docInsert)
 	if err != nil {
 		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
 	}
-	walletInitStruct := moduleDbSrc.NewWallet(string(priv[:]))
-	walletSign, err := walletInitStruct.CreateSignatureWallet(docInsert)
-	if err != nil {
-		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
-	}
-	walletInitStruct.SecretKey = walletSign
 
 	// create database
 	docInsertResponse, err := moduleDb.AquilaModule(walletInitStruct).AquilaDbInterface.InsertDocument(docInsert, docInsertURL)
@@ -130,8 +124,6 @@ func (a *AquilaDBController) DocInsert(ctx *gin.Context) {
 // Doc Delete
 func (a *AquilaDBController) DocDelete(ctx *gin.Context) {
 
-	var configEnv = config.GlobalConfig
-
 	url := fmt.Sprintf("http://%v:%v/db/doc/delete",
 		configEnv.AquilaDB.Host,
 		configEnv.AquilaDB.AquilaDbPort,
@@ -145,17 +137,11 @@ func (a *AquilaDBController) DocDelete(ctx *gin.Context) {
 		DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
 	}
 
-	// init wallet with private key
-	priv, err := ioutil.ReadFile("/home/dev/aquilax/ossl/private_unencrypted.pem")
+	walletInitStruct, err := CreateWalletSign(docDelete)
 	if err != nil {
 		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
 	}
-	walletInitStruct := moduleDbSrc.NewWallet(string(priv[:]))
-	walletSign, err := walletInitStruct.CreateSignatureWallet(docDelete)
-	if err != nil {
-		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
-	}
-	walletInitStruct.SecretKey = walletSign
 
 	responseDelete, err := moduleDb.AquilaModule(walletInitStruct).AquilaDbInterface.DeleteDocument(docDelete, url)
 	if err != nil {
@@ -171,8 +157,6 @@ func (a *AquilaDBController) DocDelete(ctx *gin.Context) {
 
 // Dock search
 func (a *AquilaDBController) DocSearch(ctx *gin.Context) {
-
-	var configEnv = config.GlobalConfig
 
 	url := fmt.Sprintf("http://%v:%v/db/search",
 		configEnv.AquilaDB.Host,
@@ -193,19 +177,12 @@ func (a *AquilaDBController) DocSearch(ctx *gin.Context) {
 		DatabaseName: "BN4Bik3RbaY5mzJS94u8SvjZd1keyjTWaDNF36TjYzj7",
 	}
 
-	// init wallet with private key
-	priv, err := ioutil.ReadFile("/home/dev/aquilax/ossl/private_unencrypted.pem")
+	walletInitStruct, err := CreateWalletSign(searchBody)
 	if err != nil {
 		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
 	}
-	walletInitStruct := moduleDbSrc.NewWallet(string(priv[:]))
-	walletSign, err := walletInitStruct.CreateSignatureWallet(searchBody)
-	if err != nil {
-		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
-	}
-	walletInitStruct.SecretKey = walletSign
 
-	// wallet, err := moduleDbSrc.CreateSignatureWallet(searchBody)
 	response, err := moduleDb.AquilaModule(walletInitStruct).AquilaDbInterface.SearchKDocument(searchBody, url)
 	if err != nil {
 		NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
@@ -215,4 +192,23 @@ func (a *AquilaDBController) DocSearch(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"response": response,
 	})
+}
+
+func CreateWalletSign(requestStructure interface{}) (moduleDbSrc.WalletStruct, error) {
+
+	var wallet moduleDbSrc.WalletStruct
+	filePath := configEnv.PrivateUnencryptedPemFileStruct.PathToPrivateUnencryptedPemFile
+
+	priv, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return wallet, err
+	}
+	walletInitStruct := moduleDbSrc.NewWallet(string(priv[:]))
+	walletSign, err := walletInitStruct.CreateSignatureWallet(requestStructure)
+	if err != nil {
+		return wallet, err
+	}
+	walletInitStruct.SecretKey = walletSign
+
+	return walletInitStruct, nil
 }
